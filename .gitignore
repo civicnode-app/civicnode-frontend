@@ -1,0 +1,40 @@
+# Dependencies
+**/node_modules/
+.pnp
+.pnp.js
+
+# Next.js build output
+frontend/.next/
+frontend/out/
+
+# TypeScript build info
+**/*.tsbuildinfo
+
+# Python virtual environment
+backend/bin/
+backend/lib/
+backend/lib64
+backend/include/
+backend/share/
+backend/pyvenv.cfg
+backend/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
