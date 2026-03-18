@@ -7,13 +7,15 @@ export const googleAuthRequestSchema = z.object({
 export const googleAuthResponseSchema = z.object({
   success: z.literal(true),
   user: z.object({
-    id: z.coerce.number().int().nonnegative(),
+    id: z.union([
+      z.number().int().nonnegative(),
+      z.string().regex(/^\d+$/),
+    ]),
     email: z.string().email(),
     full_name: z.string().min(1),
     avatar_url: z.string().url().nullable().optional(),
   }),
   backendToken: z.string().min(1),
-  expiresAt: z.number().int().positive().nullable(),
 });
 
 export const googleAuthUrlResponseSchema = z.object({
