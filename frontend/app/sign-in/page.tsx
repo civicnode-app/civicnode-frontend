@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000";
+  process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
 
 export default function SignIn() {
   const router = useRouter();
@@ -26,11 +26,17 @@ export default function SignIn() {
     try {
       setLoading(true);
       setError(null);
+
+      // fetch URL autentikasi dari backend
       const res = await fetch(`${BACKEND_URL}/api/auth/google`, {
         headers: { Accept: "application/json" },
       });
+
+      // Jika server tidak ok, lempar error
       if (!res.ok)
         throw new Error("Gagal mendapatkan URL autentikasi dari server.");
+
+      // kalo ok lanjut
       const { url } = await res.json();
       window.location.href = url;
     } catch (err) {
