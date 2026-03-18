@@ -13,11 +13,12 @@ frontend/out/
 # Python virtual environment
 backend/bin/
 backend/lib/
-backend/lib64
+backend/lib64/
 backend/include/
 backend/share/
 backend/pyvenv.cfg
 backend/__pycache__/
+machine-learning/include/
 **/*.pyc
 **/*.pyo
 
@@ -25,6 +26,11 @@ backend/__pycache__/
 .env
 .env.local
 .env.*.local
+**/.env
+**/.env.local
+**/.env.*.local
+!.env.example
+!.env.sample
 
 # Logs
 *.log
