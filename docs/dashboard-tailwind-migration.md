@@ -85,6 +85,23 @@ Comment/hapus block reset tersebut. Tailwind v4 lewat `@import "tailwindcss"` su
 
 `TimelapseeFeed` tidak memiliki width, sehingga langsung disqueeze oleh `TimelineLog` yang `flex-1`. Diperbaiki dengan menambah `w-120 shrink-0` (setara 480px).
 
+## Penyempurnaan UI — TimelineLog & Layout
+
+### `page.tsx`
+- Tambah `max-h-120` di section content row — batasi tinggi maksimal biar tidak overflow layar
+
+### `TimelineLog.tsx`
+- Tambah `relative` di outer div — dibutuhkan untuk positioning fade overlay
+- Padding direfactor: outer div `p-0`, header eksplisit `py-4 px-6`, log list `px-6 py-4` — kontrol per-area lebih presisi dan sejajar
+- `hover:scale-[1.03]` → `hover:scale-[1.02]` — efek hover lebih subtle
+- Dummy logs ditambah dari 5 → 10 item untuk pengujian scroll
+- Tambah fade overlay di bagian bawah list:
+  ```tsx
+  <div className="absolute w-full pointer-events-none bottom-0 left-0
+    bg-linear-360 from-[rgba(202,219,183,1)] to-[rgba(202,219,183,0)] h-10" />
+  ```
+  Memberikan efek visual bahwa list masih ada konten di bawah tanpa harus menampilkan scrollbar
+
 ## Status
 
 - [x] Inline styles dihapus dari `dashboard/page.tsx`
@@ -93,4 +110,5 @@ Comment/hapus block reset tersebut. Tailwind v4 lewat `@import "tailwindcss"` su
 - [x] `dashboard/page.tsx` dipecah menjadi komponen terpisah
 - [x] Bugfix CSS unlayered reset vs `@layer utilities`
 - [x] Bugfix feed box width
+- [x] Penyempurnaan UI TimelineLog (padding, hover, fade overlay)
 - [ ] Warna brand belum di-extract ke Tailwind config (opsional)
