@@ -15,8 +15,8 @@ export default function SignIn() {
     const accessToken = params.get("access_token");
     const refreshToken = params.get("refresh_token");
     if (accessToken) {
-      localStorage.setItem("sb_access_token", accessToken);
-      if (refreshToken) localStorage.setItem("sb_refresh_token", refreshToken);
+      localStorage.setItem("access_token", accessToken);
+      if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
       window.history.replaceState({}, "", window.location.pathname);
       router.push("/dashboard");
     }
@@ -75,9 +75,8 @@ export default function SignIn() {
       });
       if (!res.ok) throw new Error("Gagal autentikasi dengan MetaMask.");
       const { access_token, refresh_token } = await res.json();
-      localStorage.setItem("sb_access_token", access_token);
-      if (refresh_token)
-        localStorage.setItem("sb_refresh_token", refresh_token);
+      localStorage.setItem("access_token", access_token);
+      if (refresh_token) localStorage.setItem("refresh_token", refresh_token);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
