@@ -1,211 +1,233 @@
-'use client';
-import React from 'react';
-import Link from 'next/link';
+"use client";
+import Link from "next/link";
+import Image from "next/image";
 
 /* ── Circular confidence score ring ───────────────────── */
 function ScoreRing({ score, size = 80 }: { score: number; size?: number }) {
-  const r   = size * 0.38;
-  const cx  = size / 2;
-  const cy  = size / 2;
+  const r = size * 0.38;
+  const cx = size / 2;
+  const cy = size / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ * (1 - Math.max(0, Math.min(100, score)) / 100);
-  const color  = score >= 75 ? '#22c55e' : score >= 50 ? '#f97316' : '#ef4444';
-  const tag    = score >= 75 ? 'AMAN'    : score >= 50 ? 'WASPADA' : 'BAHAYA';
+  const color = score >= 75 ? "#22c55e" : score >= 50 ? "#f97316" : "#ef4444";
+  const tag = score >= 75 ? "AMAN" : score >= 50 ? "WASPADA" : "BAHAYA";
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      className="shrink-0"
+    >
       {/* track */}
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#efefef" strokeWidth={size * 0.09} />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r}
+        fill="none"
+        stroke="#efefef"
+        strokeWidth={size * 0.09}
+      />
       {/* progress */}
       <circle
-        cx={cx} cy={cy} r={r} fill="none"
-        stroke={color} strokeWidth={size * 0.09}
-        strokeDasharray={circ} strokeDashoffset={offset}
+        cx={cx}
+        cy={cy}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={size * 0.09}
+        strokeDasharray={circ}
+        strokeDashoffset={offset}
         strokeLinecap="round"
-        transform={`rotate(-90 ${cx} ${cy})`} 
-        style={{ transition: 'stroke-dashoffset .6s ease, stroke .4s ease' }}
+        transform={`rotate(-90 ${cx} ${cy})`}
+        style={{ transition: "stroke-dashoffset .6s ease, stroke .4s ease" }}
       />
       {/* score number */}
-      <text x={cx} y={cy - size * 0.04} textAnchor="middle" dominantBaseline="middle"
-        fill={color} fontWeight="900" fontSize={size * 0.22}>{score}</text>
+      <text
+        x={cx}
+        y={cy - size * 0.04}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill={color}
+        fontWeight="900"
+        fontSize={size * 0.22}
+      >
+        {score}
+      </text>
       {/* label */}
-      <text x={cx} y={cy + size * 0.22} textAnchor="middle" dominantBaseline="middle"
-        fill="#b0b0b0" fontWeight="700" fontSize={size * 0.11}>{tag}</text>
+      <text
+        x={cx}
+        y={cy + size * 0.22}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill="#b0b0b0"
+        fontWeight="700"
+        fontSize={size * 0.11}
+      >
+        {tag}
+      </text>
     </svg>
   );
 }
 
 export default function Dashboard() {
-  /* demo value — ganti dengan data real dari Supabase */
   const demoScore = 0;
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
+    <div className="flex min-h-screen w-full">
       {/* --- SIDEBAR KIRI --- */}
-      <aside className="sidebar">
-        <div className="logo-section">
-          <div className="logo-group">
-            <img src="/logo cv.png" alt="Logo" className="logo-icon" style={{ height: '40px' }} />
-            <div className="logo-text">
+      <aside className="w-70 shrink-0 flex flex-col bg-[#DAD7CD] border-r-2 border-[#588157] px-5 py-10">
+        <div className="mb-12">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo cv.png"
+              alt="Logo"
+              width={40}
+              height={40}
+              className="h-10 w-auto"
+            />
+            <div className="flex gap-1 text-2xl font-extrabold">
               <span className="text-black">CIVIC</span>
-              <span className="text-green">NODE</span>
+              <span className="text-[#588157]">NODE</span>
             </div>
           </div>
         </div>
-        <nav className="menu-nav">
+        <nav className="flex flex-col gap-4">
           <Link href="/dashboard">
-            <button className="menu-btn active">DASHBOARD</button>
+            <button className="w-full px-6 py-4 rounded-full border-none bg-[#588157] text-white font-extrabold text-[15px] text-left cursor-pointer translate-x-2.5 transition-all duration-300">
+              DASHBOARD
+            </button>
           </Link>
           <Link href="/system-config">
-            <button className="menu-btn">SYSTEM CONFIG</button>
+            <button className="w-full px-6 py-4 rounded-full border-none bg-[#a3b18a] text-white font-extrabold text-[15px] text-left cursor-pointer transition-all duration-300 hover:bg-[#588157] hover:translate-x-2.5">
+              SYSTEM CONFIG
+            </button>
           </Link>
           <Link href="/cctv">
-            <button className="menu-btn">CCTV</button>
+            <button className="w-full px-6 py-4 rounded-full border-none bg-[#a3b18a] text-white font-extrabold text-[15px] text-left cursor-pointer transition-all duration-300 hover:bg-[#588157] hover:translate-x-2.5">
+              CCTV
+            </button>
           </Link>
         </nav>
       </aside>
 
       {/* --- KONTEN UTAMA --- */}
-      <main style={{ flex: 1, backgroundColor: '#588157', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
-        {/* Header — search kiri, profil+notif kanan, sejajar vertikal */}
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-          <div className="dash-search">
-            <span style={{ fontSize: '16px', opacity: 0.85 }}>🔍</span>
-            <input type="text" placeholder="SEARCH" style={{ background: 'transparent', border: 'none', color: 'white', outline: 'none', width: '100%', fontWeight: '700', fontSize: '14px' }} />
+      <main className="flex-1 bg-[#588157] p-8 flex flex-col gap-6">
+        {/* Header */}
+        <header className="flex justify-between items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-2.5 bg-white/15 rounded-full px-5 py-2.5 text-white w-65">
+            <span className="text-base opacity-85">🔍</span>
+            <input
+              type="text"
+              placeholder="SEARCH"
+              className="bg-transparent border-none text-white outline-none w-full font-bold text-sm placeholder:text-white/70"
+            />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="flex items-center gap-4">
             {/* Bell */}
-            <div style={{ fontSize: '22px', cursor: 'pointer', position: 'relative', lineHeight: 1 }}>
+            <div className="text-[22px] cursor-pointer relative leading-none">
               🔔
-              <div style={{ position: 'absolute', top: '0', right: '0', width: '9px', height: '9px', backgroundColor: 'red', borderRadius: '50%', border: '2px solid #588157' }}></div>
+              <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-[#588157]" />
             </div>
             {/* Profile */}
-            <div style={{ backgroundColor: '#a3b18a', padding: '6px 20px', borderRadius: '50px', display: 'flex', alignItems: 'center', gap: '10px', color: 'white' }}>
-              <div style={{ width: '38px', height: '38px', backgroundColor: '#eee', borderRadius: '50%', border: '2px solid #333', flexShrink: 0 }}></div>
-              <div style={{ lineHeight: '1.3' }}>
-                <p style={{ margin: 0, fontWeight: '800', fontSize: '14px' }}>ATUN</p>
-                <p style={{ margin: 0, fontSize: '10px', opacity: 0.8 }}>OWNER</p>
+            <div className="bg-[#a3b18a] px-5 py-1.5 rounded-full flex items-center gap-2.5 text-white">
+              <div className="w-9.5 h-9.5 bg-[#eee] rounded-full border-2 border-[#333] shrink-0" />
+              <div className="leading-snug">
+                <p className="m-0 font-extrabold text-sm">ATUN</p>
+                <p className="m-0 text-[10px] opacity-80">OWNER</p>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Stats Grid — 4 kolom seragam */}
-        <section className="dash-stats">
+        {/* Stats Grid — 4 kolom */}
+        <section className="grid grid-cols-4 gap-4 max-[1100px]:grid-cols-2">
           {[
-            { label: 'ACTIVE DETECTIONS', value: '—' },
-            { label: 'WASTE REDUCTION',   value: '—' },
-            { label: 'NODE REPUTATION',   value: '—' },
+            { label: "ACTIVE DETECTIONS", value: "—" },
+            { label: "WASTE REDUCTION", value: "—" },
+            { label: "NODE REPUTATION", value: "—" },
           ].map((s) => (
-            <div key={s.label} style={{ backgroundColor: 'white', borderRadius: '20px', padding: '20px 24px', boxShadow: '0 4px 10px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: '8px', minHeight: '116px', justifyContent: 'space-between' }}>
-              <p style={{ margin: 0, fontSize: '11px', fontWeight: '700', color: '#888', letterSpacing: '0.06em' }}>{s.label}</p>
-              <p style={{ margin: 0, fontSize: '28px', fontWeight: '900', color: '#222' }}>{s.value}</p>
+            <div
+              key={s.label}
+              className="bg-white rounded-[20px] px-6 py-5 shadow-[0_4px_10px_rgba(0,0,0,0.08)] flex flex-col gap-2 min-h-29 justify-between"
+            >
+              <p className="m-0 text-[11px] font-bold text-[#888] tracking-[0.06em]">
+                {s.label}
+              </p>
+              <p className="m-0 text-[28px] font-black text-[#222]">
+                {s.value}
+              </p>
             </div>
           ))}
 
           {/* Confidence Score card */}
-          <div style={{ backgroundColor: 'white', borderRadius: '20px', padding: '20px 24px', boxShadow: '0 4px 10px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: '6px', minHeight: '116px', justifyContent: 'space-between' }}>
-            <p style={{ margin: 0, fontSize: '11px', fontWeight: '700', color: '#888', letterSpacing: '0.06em' }}>CONFIDENCE SCORE</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="bg-white rounded-[20px] px-6 py-5 shadow-[0_4px_10px_rgba(0,0,0,0.08)] flex flex-col gap-1.5 min-h-29 justify-between">
+            <p className="m-0 text-[11px] font-bold text-[#888] tracking-[0.06em]">
+              CONFIDENCE SCORE
+            </p>
+            <div className="flex items-center gap-3">
               <ScoreRing score={demoScore} size={72} />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <p style={{ margin: 0, fontSize: '11px', fontWeight: '700', color: '#aaa' }}>{demoScore}/100</p>
-                <p style={{ margin: 0, fontSize: '10px', color: '#ccc' }}>Rata-rata skor</p>
+              <div className="flex flex-col gap-1">
+                <p className="m-0 text-[11px] font-bold text-[#aaa]">
+                  {demoScore}/100
+                </p>
+                <p className="m-0 text-[10px] text-[#ccc]">Rata-rata skor</p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Content Row — feed + log, tinggi sejajar */}
-        <section className="dash-content">
-
+        {/* Content Row — feed + log */}
+        <section className="flex gap-7 min-h-105">
           {/* Time-lapse Feed */}
-          <div className="dash-feed" style={{ backgroundColor: 'white', borderRadius: '30px', padding: '24px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ color: 'red', fontSize: '18px' }}>📡</span>
-                <span style={{ color: 'red', fontWeight: '700', fontSize: '14px' }}>Time-lapse Feed</span>
+          <div className="bg-white rounded-[30px] p-6 shadow-[0_4px_15px_rgba(0,0,0,0.05)] flex flex-col min-h-105">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-1">
+                <span className="text-red-500 text-lg">📡</span>
+                <span className="text-red-500 font-bold text-sm">
+                  Time-lapse Feed
+                </span>
               </div>
-              <span style={{ fontWeight: '800', color: '#333', fontSize: '14px' }}>CCTV_1</span>
+              <span className="font-extrabold text-[#333] text-sm">CCTV_1</span>
             </div>
 
             {/* Preview placeholder */}
-            <div style={{ flex: 1, backgroundColor: '#f5f5f5', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '280px' }}>
-              <span style={{ fontSize: '48px', opacity: 0.2 }}>📷</span>
+            <div className="flex-1 bg-[#f5f5f5] rounded-[20px] flex items-center justify-center min-h-70 mt-3">
+              <span className="text-5xl opacity-20">📷</span>
             </div>
 
-            <div style={{ paddingTop: '12px', borderTop: '1px solid #eee' }}>
-              <p style={{ margin: 0, fontWeight: '800', fontSize: '16px', color: '#333' }}>Siring</p>
-              <p style={{ margin: '4px 0 0', fontSize: '13px', opacity: 0.6, color: '#333' }}>Minggu, 01 Maret 2026 21.24</p>
+            <div className="pt-3 border-t border-[#eee] mt-3">
+              <p className="m-0 font-extrabold text-base text-[#333]">Siring</p>
+              <p className="m-0 mt-1 text-[13px] opacity-60 text-[#333]">
+                Minggu, 01 Maret 2026 21.24
+              </p>
             </div>
           </div>
 
           {/* Timeline Log */}
-          <div style={{ flex: 1, backgroundColor: '#CADBB7', borderRadius: '30px', padding: '24px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <div style={{ width: '11px', height: '11px', backgroundColor: '#333', borderRadius: '50%', flexShrink: 0 }}></div>
-              <span style={{ fontWeight: '800', fontSize: '13px', letterSpacing: '0.05em' }}>TIMELINE LOG</span>
+          <div className="flex-1 bg-[#CADBB7] rounded-[30px] p-6 overflow-hidden flex flex-col">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-2.5 h-2.5 bg-[#333] rounded-full shrink-0" />
+              <span className="font-extrabold text-[13px] tracking-[0.05em]">
+                TIMELINE LOG
+              </span>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px', paddingRight: '4px', scrollbarWidth: 'none' }}>
+            <div className="flex-1 overflow-y-auto flex flex-col gap-2.5 pr-1 [scrollbar-width:none]">
               {[1, 2, 3, 4, 5].map((item) => (
-                <div key={item} className="log-item" style={{ backgroundColor: '#a3b18a', padding: '14px 16px', borderRadius: '18px', color: 'white', flexShrink: 0 }}>
-                  <p style={{ margin: 0, fontSize: '13px', fontWeight: '700' }}>Siring</p>
-                  <p style={{ margin: '2px 0 0', fontSize: '11px', opacity: 0.8 }}>Minggu, 01 Maret 2026 21.2{item}</p>
+                <div
+                  key={item}
+                  className="bg-[#a3b18a] px-4 py-3.5 rounded-[18px] text-white shrink-0 cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] hover:scale-[1.03] hover:bg-[#588157] hover:shadow-[0_10px_25px_rgba(0,0,0,0.25)]"
+                >
+                  <p className="m-0 text-[13px] font-bold">Siring</p>
+                  <p className="m-0 mt-0.5 text-[11px] opacity-80">
+                    Minggu, 01 Maret 2026 21.2{item}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
-
-
         </section>
       </main>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        .dashboard-wrapper { display: flex; min-height: 100vh; }
-        .sidebar { width: 280px; background-color: #DAD7CD; padding: 40px 20px; border-right: 2px solid #588157; display: flex; flex-direction: column; flex-shrink: 0; }
-        .logo-section { margin-bottom: 50px; }
-        .logo-group { display: flex; align-items: center; gap: 12px; }
-        .logo-icon { height: 40px; }
-        .logo-text { font-size: 24px; font-weight: 800; display: flex; gap: 4px; }
-        .text-black { color: #000; }
-        .text-green { color: #588157; }
-        .menu-nav { display: flex; flex-direction: column; gap: 15px; margin-top: 0; }
-        .menu-btn {
-          width: 100%; padding: 15px 25px; border-radius: 50px; border: none;
-          background-color: #a3b18a; color: white; font-weight: 800;
-          font-size: 15px; text-align: left; cursor: pointer; transition: all 0.3s ease;
-        }
-        .menu-btn.active, .menu-btn:hover { background-color: #588157; transform: translateX(10px); }
-        .dash-search {
-          display: flex; align-items: center; gap: 10px;
-          background-color: rgba(255,255,255,0.15); border-radius: 50px;
-          padding: 10px 20px; color: white; width: 260px;
-        }
-        .dash-stats {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 16px;
-        }
-        .dash-content {
-          display: flex;
-          gap: 28px;
-          min-height: 420px;
-        }
-        .dash-feed { min-height: 420px; }
-        @media (max-width: 1100px) {
-          .dash-stats { grid-template-columns: repeat(2, 1fr); }
-          .dash-content { grid-template-columns: 1fr; }
-        }
-        .log-item {
-          transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer;
-        }
-        .log-item:hover {
-          transform: scale(1.03);
-          background-color: #588157 !important;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-        }
-      `}} />
     </div>
   );
 }
