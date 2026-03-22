@@ -49,10 +49,11 @@ export default function SignIn() {
     try {
       setLoading(true);
       setError(null);
+
       const ethereum = (
         window as {
           ethereum?: {
-            request: (args: { method: string }) => Promise<string[]>;
+            request: (args: { method: string; params?: unknown[] }) => Promise<string[]>;
           };
         }
       ).ethereum;
@@ -60,23 +61,41 @@ export default function SignIn() {
         throw new Error(
           "MetaMask tidak ditemukan. Silakan install ekstensi MetaMask.",
         );
+
+      // Step 1: minta wallet address
       const accounts: string[] = await ethereum.request({
         method: "eth_requestAccounts",
       });
       if (!accounts.length)
         throw new Error("Tidak ada akun MetaMask yang dipilih.");
+      const wallet_address = accounts[0];
+
+      // Step 2: minta nonce dari backend
+      const nonceRes = await fetch(
+        `${BACKEND_URL}/api/auth/nonce?address=${wallet_address}`,
+        { headers: { Accept: "application/json" } },
+      );
+      if (!nonceRes.ok) throw new Error("Gagal mendapatkan nonce dari server.");
+      const { data: { nonce } } = await nonceRes.json();
+
+      // Step 3: minta user sign nonce via MetaMask
+      const signature = await ethereum.request({
+        method: "personal_sign",
+        params: [nonce, wallet_address],
+      });
+
+      // Step 4: kirim ke backend untuk verifikasi
       const res = await fetch(`${BACKEND_URL}/api/auth/metamask`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ address: accounts[0] }),
+        body: JSON.stringify({ wallet_address, signature: signature[0] ?? signature, nonce }),
       });
       if (!res.ok) throw new Error("Gagal autentikasi dengan MetaMask.");
-      const { access_token, refresh_token } = await res.json();
+      const { data: { access_token } } = await res.json();
       localStorage.setItem("access_token", access_token);
-      if (refresh_token) localStorage.setItem("refresh_token", refresh_token);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
