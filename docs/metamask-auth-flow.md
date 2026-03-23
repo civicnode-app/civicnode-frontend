@@ -60,6 +60,9 @@ Disimpan di localStorage dengan key `access_token`.
 Frontend pakai `wallet_requestPermissions` agar popup pilih akun selalu muncul.
 Dengan `eth_requestAccounts`, MetaMask skip popup kalau site sudah pernah connected.
 
+### wallet_address selalu lowercase
+Semua wallet_address distandardisasi ke lowercase di seluruh lapisan — frontend, backend, dan DB. Kalau nanti ada staff baru yang ditambah manual ke Supabase, pastikan wallet_address-nya **lowercase**.
+
 ### Bug Brave Browser
 `wallet_requestPermissions` trigger bug BigNumber internal di Brave versi tertentu
 karena konflik dengan Brave Wallet. **Gunakan Firefox atau Chrome untuk development.**
