@@ -50,24 +50,33 @@ export default function SignIn() {
       setLoading(true);
       setError(null);
 
+      // Step 0: pengecekan ekstensi MetaMask
       const ethereum = (
         window as {
           ethereum?: {
-            request: (args: { method: string; params?: unknown[] }) => Promise<string[]>;
+            request: (args: {
+              method: string;
+              params?: unknown[];
+            }) => Promise<unknown>;
           };
         }
       ).ethereum;
-      if (!ethereum)
+      // Jika MetaMask tidak ditemukan, beri tahu user
+      if (!ethereum) {
         throw new Error(
           "MetaMask tidak ditemukan. Silakan install ekstensi MetaMask.",
         );
+      }
 
       // Step 1: minta wallet address
-      const accounts: string[] = await ethereum.request({
+      const accounts = (await ethereum.request({
         method: "eth_requestAccounts",
-      });
-      if (!accounts.length)
+      })) as string[];
+      // Jika user tidak memilih akun mana pun, beri tahu mereka
+      if (!accounts.length) {
         throw new Error("Tidak ada akun MetaMask yang dipilih.");
+      }
+      // Ambil wallet address pertama (default)
       const wallet_address = accounts[0];
 
       // Step 2: minta nonce dari backend
@@ -75,14 +84,18 @@ export default function SignIn() {
         `${BACKEND_URL}/api/auth/nonce?address=${wallet_address}`,
         { headers: { Accept: "application/json" } },
       );
+      // Jika server tidak ok, lempar error
       if (!nonceRes.ok) throw new Error("Gagal mendapatkan nonce dari server.");
-      const { data: { nonce } } = await nonceRes.json();
+      // Jika ok, ambil nonce dari response
+      const {
+        data: { nonce },
+      } = await nonceRes.json();
 
       // Step 3: minta user sign nonce via MetaMask
-      const signature = await ethereum.request({
+      const signature = (await ethereum.request({
         method: "personal_sign",
         params: [nonce, wallet_address],
-      });
+      })) as string;
 
       // Step 4: kirim ke backend untuk verifikasi
       const res = await fetch(`${BACKEND_URL}/api/auth/metamask`, {
@@ -91,11 +104,17 @@ export default function SignIn() {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({ wallet_address, signature: signature[0] ?? signature, nonce }),
+        body: JSON.stringify({ wallet_address, signature, nonce }),
       });
+      // Jika server tidak ok, lempar error
+      // kemungkinan karena signature tidak valid atau nonce sudah dipakai atau karena user belum terdaftar di Supabase
       if (!res.ok) throw new Error("Gagal autentikasi dengan MetaMask.");
-      const { data: { access_token } } = await res.json();
+      // Jika ok, ambil access token dari response dan simpan di localStorage
+      const {
+        data: { access_token },
+      } = await res.json();
       localStorage.setItem("access_token", access_token);
+      // redirect ke dashboard
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
