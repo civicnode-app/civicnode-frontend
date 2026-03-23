@@ -68,15 +68,14 @@ export default function SignIn() {
         );
       }
 
-      // Step 1: minta wallet address
-      const accounts = (await ethereum.request({
-        method: "eth_requestAccounts",
-      })) as string[];
-      // Jika user tidak memilih akun mana pun, beri tahu mereka
-      if (!accounts.length) {
+      // Step 1: selalu tampilkan popup pilih akun
+      const permissions = (await ethereum.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }],
+      })) as { caveats: { value: string[] }[] }[];
+      const accounts = permissions[0]?.caveats[0]?.value ?? [];
+      if (!accounts.length)
         throw new Error("Tidak ada akun MetaMask yang dipilih.");
-      }
-      // Ambil wallet address pertama (default)
       const wallet_address = accounts[0];
 
       // Step 2: minta nonce dari backend
