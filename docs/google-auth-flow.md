@@ -2,8 +2,7 @@
 
 ## Status
 
-Frontend: sudah selesai, tidak perlu diubah.
-Backend: perlu diimplementasi sesuai flow di bawah.
+Sudah selesai dan berjalan. Backend dan frontend sudah sinkron.
 
 ## Flow Lengkap
 
@@ -18,42 +17,50 @@ Backend: perlu diimplementasi sesuai flow di bawah.
          ↓
 5. User login di Google
          ↓
-6. Google redirect ke backend callback (redirect_uri yang backend set)
-   contoh: http://localhost:3001/api/auth/google/callback?code=...
+6. Google redirect ke backend callback:
+   http://localhost:3001/api/auth/google/callback?code=...
          ↓
-7. Backend tukar code → dapat access_token + refresh_token dari Google/Supabase
+7. Backend tukar code → dapat info user dari Google → upsert ke public.users
+   → sign custom JWT { user_id, email, role: "warga" }
          ↓
 8. Backend redirect ke frontend:
-   http://localhost:3000/sign-in?access_token=TOKEN&refresh_token=TOKEN
+   http://localhost:3000/sign-in?access_token=TOKEN
          ↓
 9. useEffect di sign-in/page.tsx nangkep token dari URL params
-   → simpan ke localStorage
+   → simpan ke localStorage dengan key "access_token"
+   → bersihkan URL
    → redirect ke /dashboard
 ```
 
-## Kontrak yang Harus Dipenuhi Backend
+## Kontrak Backend
 
 ### GET /api/auth/google
 
-Response:
+Response **tidak pakai `success()` wrapper** — return langsung:
 
 ```json
 { "url": "https://accounts.google.com/o/oauth2/auth?..." }
 ```
 
+> Endpoint lain pakai `{ success: true, data: {...} }`. Hanya endpoint ini yang berbeda karena frontend destructure `{ url }` langsung dari root.
+
 ### GET /api/auth/google/callback
 
 - Menerima `?code=...` dari Google
-- Tukar code ke token
-- Redirect ke: `http://localhost:3000/sign-in?access_token=TOKEN&refresh_token=TOKEN`
+- Redirect ke: `http://localhost:3000/sign-in?access_token=TOKEN`
+- `refresh_token` tidak dikirim — token expire 24h, user login ulang
 
-## File Frontend yang Relevan
+## Token
 
-- [`frontend/app/sign-in/page.tsx`](../frontend/app/sign-in/page.tsx) — handleGoogleLogin + useEffect token receiver
+Custom JWT yang di-sign backend sendiri — bukan Supabase native token.
+Disimpan di localStorage dengan key `access_token`.
+
+```json
+{ "user_id": "uuid", "email": "user@gmail.com", "role": "warga" }
+```
+
+## File yang Relevan
+
+- [`frontend/app/sign-in/page.tsx`](../frontend/app/sign-in/page.tsx) — `handleGoogleLogin` + `useEffect` token receiver
 - [`frontend/.env`](../frontend/.env) — `NEXT_PUBLIC_BACKEND_URL=http://localhost:3001`
 - [`frontend/next.config.ts`](../frontend/next.config.ts) — proxy `/api/*` → `http://localhost:3001/api/*`
-
-## Catatan
-
-- Token disimpan di localStorage dengan key `sb_access_token` dan `sb_refresh_token`
-- Setelah token diterima, URL dibersihkan via `window.history.replaceState` sebelum redirect
