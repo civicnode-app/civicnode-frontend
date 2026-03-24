@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
+import { Sidebar } from '@/components/Sidebar';
 
 type ViewMode = 'single' | 'dual' | 'triple';
 
@@ -36,67 +36,59 @@ export default function CCTVPage() {
   const currentView   = VIEW_OPTIONS.find(v => v.value === viewMode)!;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
-      
-      {/* --- SIDEBAR --- */}
-      <aside style={{ width: '280px', flexShrink: 0, backgroundColor: '#DAD7CD', padding: '40px 20px', borderRight: '2px solid #588157', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ marginBottom: '50px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img src="/logo cv.png" alt="Logo" style={{ height: '40px' }} />
-          <div style={{ fontSize: '24px', fontWeight: '800', display: 'flex', gap: '4px' }}>
-            <span style={{ color: '#000' }}>CIVIC</span>
-            <span style={{ color: '#588157' }}>NODE</span>
-          </div>
-        </div>
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <Link href="/dashboard" style={{ textDecoration: 'none' }}>
-            <button className="menu-btn">DASHBOARD</button>
-          </Link>
-          <Link href="/system-config" style={{ textDecoration: 'none' }}>
-            <button className="menu-btn">SYSTEM CONFIG</button>
-          </Link>
-          <Link href="/cctv" style={{ textDecoration: 'none' }}>
-            <button className="menu-btn active">CCTV</button>
-          </Link>
-        </nav>
-      </aside>
+    <div className="flex min-h-screen w-full">
+      <Sidebar />
 
       {/* --- MAIN --- */}
-      <main style={{ flex: 1, backgroundColor: '#588157', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <main className="flex-1 bg-[#588157] p-8 flex flex-col gap-6">
 
         {/* Header — kiri: title+badge | kanan: profile+dropdown */}
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ color: 'white', fontWeight: '800', fontSize: '20px', letterSpacing: '0.05em' }}>CCTV MONITOR</span>
-            <span style={{ backgroundColor: '#a3b18a', color: 'white', padding: '5px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: '700' }}>
+        <header className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <span className="text-white font-extrabold text-xl tracking-[0.05em]">CCTV MONITOR</span>
+            <span className="bg-[#a3b18a] text-white px-[14px] py-[5px] rounded-[20px] text-xs font-bold">
               {currentView.label} · {currentView.desc}
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="flex items-center gap-4">
             {/* Profile pill */}
-            <div style={{ backgroundColor: '#a3b18a', padding: '6px 20px', borderRadius: '50px', display: 'flex', alignItems: 'center', gap: '12px', color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-              <div style={{ width: '40px', height: '40px', backgroundColor: '#eee', borderRadius: '50%', border: '2px solid #333', flexShrink: 0 }}></div>
-              <div style={{ lineHeight: '1.2' }}>
-                <p style={{ fontWeight: '800', margin: 0, fontSize: '15px' }}>ATUN</p>
-                <p style={{ fontSize: '10px', margin: 0, opacity: 0.8 }}>OWNER</p>
+            <div className="bg-[#a3b18a] py-[6px] px-5 rounded-full flex items-center gap-3 text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
+              <div className="w-10 h-10 bg-[#eee] rounded-full border-2 border-[#333] shrink-0"></div>
+              <div className="leading-[1.2]">
+                <p className="font-extrabold m-0 text-[15px]">ATUN</p>
+                <p className="text-[10px] m-0 opacity-80">OWNER</p>
               </div>
             </div>
 
             {/* ⋮ Dropdown */}
-            <div ref={dropRef} style={{ position: 'relative' }}>
-              <button onClick={() => setDropdownOpen(o => !o)} className="dots-btn">⋮</button>
+            <div ref={dropRef} className="relative">
+              <button
+                onClick={() => setDropdownOpen(o => !o)}
+                className="text-[26px] font-bold cursor-pointer text-white bg-transparent border-none leading-none px-[10px] py-[6px] rounded-[10px] transition-colors duration-200 hover:bg-white/[0.18]"
+              >
+                ⋮
+              </button>
 
               {dropdownOpen && (
-                <div className="dropdown-menu">
-                  <p className="dropdown-label">LAYOUT VIEW</p>
+                <div className="absolute top-[calc(100%+8px)] right-0 bg-white rounded-[18px] shadow-[0_8px_32px_rgba(0,0,0,0.18)] overflow-hidden min-w-[190px] z-[100] animate-[fadeDropdown_0.15s_ease-out]">
+                  <p className="m-0 px-4 pt-3 pb-2 text-[10px] font-extrabold text-[#aaa] tracking-[0.1em] uppercase">
+                    LAYOUT VIEW
+                  </p>
                   {VIEW_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       onClick={() => { setViewMode(opt.value); setDropdownOpen(false); }}
-                      className={`dropdown-item${viewMode === opt.value ? ' dropdown-item-active' : ''}`}
+                      className={`w-full px-4 py-[11px] border-none cursor-pointer text-left font-semibold text-sm flex justify-between items-center transition-colors duration-150 hover:bg-[#f5f5f5] ${
+                        viewMode === opt.value
+                          ? 'bg-[#f0f5ee] text-[#588157] font-extrabold hover:bg-[#f0f5ee]'
+                          : 'bg-white text-[#333]'
+                      }`}
                     >
                       <span>{opt.label}</span>
-                      <span className="dropdown-item-desc">{opt.desc}</span>
+                      <span className={`text-[11px] font-semibold ${viewMode === opt.value ? 'text-[#a3b18a]' : 'text-[#bbb]'}`}>
+                        {opt.desc}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -106,93 +98,35 @@ export default function CCTVPage() {
         </header>
 
         {/* CCTV Grid — jumlah kartu berubah dinamis */}
-        <div style={{
-          backgroundColor: '#CADBB7',
-          borderRadius: '45px',
-          padding: '28px',
-          display: 'flex',
-          gap: '20px',
-          flex: 1,
-          alignItems: 'stretch',
-          transition: 'all 0.35s cubic-bezier(0.25, 1, 0.5, 1)',
-        }}>
+        <div className="bg-[#CADBB7] rounded-[45px] p-7 flex gap-5 flex-1 items-stretch transition-all duration-[350ms] ease-[cubic-bezier(0.25,1,0.5,1)]">
           {visibleNodes.map((node) => (
-            <div key={node.id} className="cctv-card" style={{ flex: 1, minWidth: 0 }}>
+            <div
+              key={node.id}
+              className="flex-1 min-w-0 bg-white rounded-[36px] h-[550px] p-7 flex flex-col justify-between shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer hover:scale-[1.025] hover:shadow-[0_12px_32px_rgba(0,0,0,0.14)]"
+            >
               {/* Card top */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div className="flex justify-between items-start">
                 <div>
-                  <p className="txt-bold">{node.label}</p>
-                  <p className="txt-small" style={{ marginTop: '4px' }}>{node.id}</p>
+                  <p className="font-black text-lg m-0 text-black">{node.label}</p>
+                  <p className="font-extrabold text-xs m-0 text-[#555] mt-1">{node.id}</p>
                 </div>
-                <p className="txt-small">{node.timestamp}</p>
+                <p className="font-extrabold text-xs m-0 text-[#555]">{node.timestamp}</p>
               </div>
 
               {/* Preview area */}
-              <div style={{ flex: 1, backgroundColor: '#f5f5f5', borderRadius: '24px', margin: '16px 0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '40px', opacity: 0.25 }}>📷</span>
+              <div className="flex-1 bg-[#f5f5f5] rounded-3xl my-4 flex items-center justify-center">
+                <span className="text-[40px] opacity-25">📷</span>
               </div>
 
               {/* Card bottom */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <p className="txt-bold">{node.camera}</p>
-                <p style={{ fontWeight: '700', fontSize: '11px', margin: 0, color: '#666', fontFamily: 'monospace', letterSpacing: '0.03em' }}>{node.ip_address}</p>
+              <div className="flex flex-col gap-1">
+                <p className="font-black text-lg m-0 text-black">{node.camera}</p>
+                <p className="font-bold text-[11px] m-0 text-[#666] font-mono tracking-[0.03em]">{node.ip_address}</p>
               </div>
             </div>
           ))}
         </div>
       </main>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes fadeDropdown {
-          from { opacity: 0; transform: translateY(-8px) scale(0.97); }
-          to   { opacity: 1; transform: translateY(0)   scale(1); }
-        }
-        .dots-btn {
-          font-size: 26px; font-weight: bold; cursor: pointer; color: white;
-          background: none; border: none; line-height: 1;
-          padding: 6px 10px; border-radius: 10px; transition: background 0.2s;
-        }
-        .dots-btn:hover { background: rgba(255,255,255,0.18); }
-        .dropdown-menu {
-          position: absolute; top: calc(100% + 8px); right: 0;
-          background: white; border-radius: 18px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-          overflow: hidden; min-width: 190px; z-index: 100;
-          animation: fadeDropdown 0.15s ease-out;
-        }
-        .dropdown-label {
-          margin: 0; padding: 12px 16px 8px;
-          font-size: 10px; font-weight: 800; color: #aaa;
-          letter-spacing: 0.1em; text-transform: uppercase;
-        }
-        .dropdown-item {
-          width: 100%; padding: 11px 16px; border: none; cursor: pointer;
-          text-align: left; background: white; color: #333;
-          font-weight: 600; font-size: 14px;
-          display: flex; justify-content: space-between; align-items: center;
-          transition: background 0.15s;
-        }
-        .dropdown-item:hover { background: #f5f5f5; }
-        .dropdown-item-active { background: #f0f5ee !important; color: #588157 !important; font-weight: 800 !important; }
-        .dropdown-item-desc { font-size: 11px; color: #bbb; font-weight: 600; }
-        .dropdown-item-active .dropdown-item-desc { color: #a3b18a; }
-        .cctv-card {
-          background-color: white; border-radius: 36px; padding: 28px;
-          display: flex; flex-direction: column;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-          transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer;
-        }
-        .cctv-card:hover { transform: scale(1.025); box-shadow: 0 12px 32px rgba(0,0,0,0.14); }
-        .txt-bold { font-weight: 900; font-size: 18px; margin: 0; color: #000; }
-        .txt-small { font-weight: 800; font-size: 12px; margin: 0; color: #555; }
-        .menu-btn {
-          width: 100%; padding: 15px 25px; border-radius: 50px; border: none;
-          background-color: #a3b18a; color: white; font-weight: 800;
-          text-align: left; cursor: pointer; transition: all 0.3s ease;
-        }
-        .menu-btn.active { background-color: #588157; }
-        .menu-btn:hover { background-color: #588157; transform: translateX(10px); }
-      `}} />
     </div>
   );
 }

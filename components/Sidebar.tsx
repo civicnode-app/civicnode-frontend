@@ -16,10 +16,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside
-      className="style={{ width: '280px', flexShrink: 0, backgroundColor: '#DAD7CD', padding: '40px 20px', borderRight: '2px solid #588157', display: 'flex', flexDirection: 'column' }}"
-      style={{ minHeight: '100vh' }}
-    >
+    <aside className="w-[280px] shrink-0 bg-[#DAD7CD] px-5 py-10 border-r-2 border-[#588157] flex flex-col min-h-screen">
       {/* Logo */}
       <div className="mb-12 flex items-center gap-3">
         <Image

@@ -135,24 +135,6 @@ export default function LandingPage() {
       </section>
 
       {/* CSS internal agar Maria tidak perlu edit globals.css lagi */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        .feature-card {
-          transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-          cursor: pointer;
-        }
-        .feature-card:hover {
-          transform: scale(1.05); /* Efek timbul ke tengah */
-        }
-        .btn-login, .btn-try {
-          transition: all 0.3s ease;
-          cursor: pointer;
-        }
-        .btn-login:hover, .btn-try:hover {
-          filter: brightness(1.1);
-          transform: translateY(-3px);
-          box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-      `}} />
     </div>
   );
 }

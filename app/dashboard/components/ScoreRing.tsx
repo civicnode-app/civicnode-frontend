@@ -41,7 +41,7 @@ export default function ScoreRing({
         strokeDashoffset={offset}
         strokeLinecap="round"
         transform={`rotate(-90 ${cx} ${cy})`}
-        style={{ transition: "stroke-dashoffset .6s ease, stroke .4s ease" }}
+        className="[transition:stroke-dashoffset_.6s_ease,stroke_.4s_ease]"
       />
       {/* score number */}
       <text

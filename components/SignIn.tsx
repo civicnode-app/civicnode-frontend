@@ -45,16 +45,10 @@ export default function SignIn() {
   return (
     <main className="relative min-h-screen w-full flex items-center justify-center font-sans overflow-hidden">
       {/* 1. Background Bergerak Unik (Sama dengan Login) */}
-      <div
-        className="absolute -inset-10 bg-[url('/hutan.jpg')] bg-cover bg-center animate-hutan-pro"
-        style={{ zIndex: -2 }}
-      ></div>
+      <div className="absolute -inset-10 bg-[url('/hutan.jpg')] bg-cover bg-center animate-hutan-pro -z-[2]"></div>
 
       {/* 2. Overlay Gelap */}
-      <div
-        className="absolute inset-0 bg-black/45 backdrop-brightness-75"
-        style={{ zIndex: -1 }}
-      ></div>
+      <div className="absolute inset-0 bg-black/45 backdrop-brightness-75 -z-[1]"></div>
 
       {/* 3. Box Register */}
       <div className="relative z-10 w-full max-w-md p-10 bg-white/10 backdrop-blur-3xl border border-white/20 rounded-[40px] shadow-2xl text-white mx-4 animate-fade-up">
