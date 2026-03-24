@@ -138,7 +138,7 @@ export default function SignIn() {
             <button
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="flex items-center justify-center gap-3 w-full py-3.5 rounded-full border-2 border-[#dadce0] bg-white text-[#3c4043] font-bold text-[15px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-shadow duration-200 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-3 w-full py-4 px-8 rounded-full border-2 border-[#dadce0] bg-white text-[#3c4043] font-bold text-[15px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-shadow duration-200 disabled:cursor-not-allowed"
             >
               <svg width="20" height="20" viewBox="0 0 48 48">
                 <path
@@ -165,7 +165,7 @@ export default function SignIn() {
             <button
               onClick={handleMetaMaskLogin}
               disabled={loading}
-              className="flex items-center justify-center gap-3 w-full py-3.5 rounded-full border-2 border-[#e8761b] bg-white text-[#e8761b] font-bold text-[15px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-shadow duration-200 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-3 w-full py-4 px-8 rounded-full border-2 border-[#e8761b] bg-white text-[#e8761b] font-bold text-[15px] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-shadow duration-200 disabled:cursor-not-allowed"
             >
               <svg
                 width="22"
