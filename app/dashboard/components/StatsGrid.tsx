@@ -1,37 +1,68 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import ScoreRing from "./ScoreRing";
 
-const STATS = [
-  { label: "ACTIVE DETECTIONS", value: "—" },
-  // { label: "WASTE REDUCTION", value: "—" },
-  { label: "ZONE REPUTATION", value: "—" },
-];
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
+const POLL_INTERVAL = 5000;
 
-export default function StatsGrid({ demoScore }: { demoScore: number }) {
+interface RealtimeStats {
+  active_detections: number;
+  confidence_score: number;
+  zone_reputation: number;
+}
+
+export default function StatsGrid() {
+  const [stats, setStats] = useState<RealtimeStats>({
+    active_detections: 0,
+    confidence_score: 0,
+    zone_reputation: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/dev/stats`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json();
+        if (json.success) setStats(json.data);
+      } catch {
+        // gagal fetch — pertahankan nilai sebelumnya
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, POLL_INTERVAL);
+    return () => clearInterval(interval);
+  }, []);
+
+  const confidencePercent = Math.round(stats.confidence_score * 100);
+
   return (
     <section className="grid grid-cols-3 gap-4 max-[1100px]:grid-cols-2 mx-auto w-280">
-      {STATS.map((s) => (
-        <div
-          key={s.label}
-          className="bg-white rounded-[20px] px-6 py-5 shadow-[0_4px_10px_rgba(0,0,0,0.08)] flex flex-col gap-2 min-h-29 justify-between"
-        >
-          <p className="m-0 text-[11px] font-bold text-[#888] tracking-[0.06em]">
-            {s.label}
-          </p>
-          <p className="m-0 text-[28px] font-black text-[#222]">{s.value}</p>
-        </div>
-      ))}
+      {/* Active Detections */}
+      <div className="bg-white rounded-[20px] px-6 py-5 shadow-[0_4px_10px_rgba(0,0,0,0.08)] flex flex-col gap-2 min-h-29 justify-between">
+        <p className="m-0 text-[11px] font-bold text-[#888] tracking-[0.06em]">ACTIVE DETECTIONS</p>
+        <p className="m-0 text-[28px] font-black text-[#222]">{stats.active_detections}</p>
+      </div>
+
+      {/* Zone Reputation */}
+      <div className="bg-white rounded-[20px] px-6 py-5 shadow-[0_4px_10px_rgba(0,0,0,0.08)] flex flex-col gap-2 min-h-29 justify-between">
+        <p className="m-0 text-[11px] font-bold text-[#888] tracking-[0.06em]">ZONE REPUTATION</p>
+        <p className="m-0 text-[28px] font-black text-[#222]">{stats.zone_reputation}</p>
+      </div>
 
       {/* Confidence Score */}
       <div className="bg-white rounded-[20px] px-6 py-5 shadow-[0_4px_10px_rgba(0,0,0,0.08)] flex flex-col gap-1.5 min-h-29 justify-between">
-        <p className="m-0 text-[11px] font-bold text-[#888] tracking-[0.06em]">
-          CONFIDENCE SCORE
-        </p>
+        <p className="m-0 text-[11px] font-bold text-[#888] tracking-[0.06em]">CONFIDENCE SCORE</p>
         <div className="flex items-center gap-3">
-          <ScoreRing score={demoScore} size={72} />
+          <ScoreRing score={confidencePercent} size={72} />
           <div className="flex flex-col gap-1">
-            <p className="m-0 text-[11px] font-bold text-[#aaa]">
-              {demoScore}/100
-            </p>
+            <p className="m-0 text-[11px] font-bold text-[#aaa]">{confidencePercent}/100</p>
             <p className="m-0 text-[10px] text-[#ccc]">Rata-rata skor</p>
           </div>
         </div>
