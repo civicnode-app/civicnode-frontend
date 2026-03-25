@@ -2,13 +2,13 @@ import ScoreRing from "./ScoreRing";
 
 const STATS = [
   { label: "ACTIVE DETECTIONS", value: "—" },
-  { label: "WASTE REDUCTION", value: "—" },
-  { label: "NODE REPUTATION", value: "—" },
+  // { label: "WASTE REDUCTION", value: "—" },
+  { label: "ZONE REPUTATION", value: "—" },
 ];
 
 export default function StatsGrid({ demoScore }: { demoScore: number }) {
   return (
-    <section className="grid grid-cols-4 gap-4 max-[1100px]:grid-cols-2">
+    <section className="grid grid-cols-3 gap-4 max-[1100px]:grid-cols-2 mx-auto w-280">
       {STATS.map((s) => (
         <div
           key={s.label}
