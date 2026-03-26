@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Sidebar } from "@/components/Sidebar";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
@@ -75,6 +75,21 @@ function repLabel(score: number) {
   if (score >= 60) return "CUKUP";
   if (score >= 40) return "KOTOR";
   return "KRITIS";
+}
+
+// ─── StreamImg ────────────────────────────────────────────────────────────────
+// Set src="" on unmount agar koneksi MJPEG ke DroidCam ditutup dengan bersih,
+// mencegah "Error creating image encoder" saat navigasi kembali ke halaman ini.
+
+function StreamImg({ src, onLoad }: { src: string; onLoad: () => void }) {
+  const ref = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    return () => { if (ref.current) ref.current.src = ""; };
+  }, []);
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img ref={ref} src={src} alt="" className="absolute inset-0 w-full h-full object-cover" onLoad={onLoad} />
+  );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -459,11 +474,8 @@ export default function CCTVPage() {
 
                 {/* Preview + bounding box overlay */}
                 <div className="relative aspect-square bg-[#f0f0f0] rounded-3xl overflow-hidden flex items-center justify-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <StreamImg
                     src={node.stream_url.replace(/\/video$/, "/mjpegfeed")}
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover"
                     onLoad={() => setStreamLoaded((prev) => ({ ...prev, [node.id]: true }))}
                   />
                   {!streamLoaded[node.id] && (
