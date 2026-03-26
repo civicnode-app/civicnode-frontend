@@ -43,7 +43,7 @@ export function StreamImg({ src, onLoad }: Props) {
       setTimeout(() => {
         if (mounted.current && ref.current) ref.current.src = src;
       }, 50);
-    }, 1000);
+    }, 2000);
   }
 
   return (
