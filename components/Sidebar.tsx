@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "DASHBOARD", href: "/dashboard" },
-  { label: "SYSTEM CONFIG", href: "/system-config" },
-  { label: "CCTV", href: "/cctv" },
+  { label: "DASHBOARD",   href: "/dashboard" },
+  { label: "SYSTEM INFO", href: "/system-config" },
+  { label: "CCTV",        href: "/cctv" },
 ];
 
 export function Sidebar() {
