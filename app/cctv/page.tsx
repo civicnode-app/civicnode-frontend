@@ -421,7 +421,7 @@ export default function CCTVPage() {
         <div className="flex-1 overflow-y-auto px-8 py-6">
 
         {/* ── CCTV Grid ── */}
-        {activeTab === "cctv" && <div className="bg-[#CADBB7] rounded-[45px] p-7 grid grid-cols-3 gap-5">
+        {activeTab === "cctv" && <div className="bg-[#CADBB7] rounded-[45px] p-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {cctvLoading && cctvList.length === 0 && (
             <div className="col-span-3 flex items-center justify-center py-10">
               <p className="text-[#588157] font-bold opacity-50">Memuat kamera...</p>
