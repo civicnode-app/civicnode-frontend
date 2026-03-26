@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value: "script-src 'self' 'unsafe-eval' 'unsafe-inline';",
+            value: "script-src 'self' 'unsafe-eval' 'unsafe-inline'; img-src 'self' data: blob: http:;",
           },
         ],
       },
