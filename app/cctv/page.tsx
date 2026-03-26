@@ -89,7 +89,7 @@ function repLabel(score: number) {
 
 export default function CCTVPage() {
   // CCTV state
-  const [viewMode, setViewMode]         = useState<ViewMode>("dual");
+  const [viewMode, setViewMode] = useState<ViewMode>("dual");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [cctvList, setCctvList]         = useState<CCTVNode[]>([]);
   const [cctvLoading, setCctvLoading]   = useState(true);
@@ -136,6 +136,12 @@ export default function CCTVPage() {
 
   const dropRef = useRef<HTMLDivElement>(null);
   const token   = () => localStorage.getItem("access_token") ?? "";
+
+  // load view mode dari localStorage setelah hydration
+  useEffect(() => {
+    const saved = localStorage.getItem("cctv_view_mode") as ViewMode | null;
+    if (saved) setViewMode(saved);
+  }, []);
 
   // tutup layout-dropdown kalau klik luar
   useEffect(() => {
@@ -348,7 +354,6 @@ export default function CCTVPage() {
   // ── Derived ────────────────────────────────────────────────────────────────
 
   const visibleCount = viewMode === "single" ? 1 : viewMode === "dual" ? 2 : 3;
-  const visibleNodes = cctvList.slice(0, visibleCount);
   const currentView  = VIEW_OPTIONS.find((v) => v.value === viewMode)!;
   const sortedZona   = [...zonaList].sort((a, b) =>
     sortOrder === "asc"
@@ -407,7 +412,7 @@ export default function CCTVPage() {
                   {VIEW_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
-                      onClick={() => { setViewMode(opt.value); setDropdownOpen(false); }}
+                      onClick={() => { setViewMode(opt.value); localStorage.setItem("cctv_view_mode", opt.value); setDropdownOpen(false); }}
                       className={`w-full px-4 py-2.75 border-none cursor-pointer text-left font-semibold text-sm flex justify-between items-center transition-colors duration-150 hover:bg-[#f5f5f5] ${
                         viewMode === opt.value
                           ? "bg-[#f0f5ee] text-[#588157] font-extrabold hover:bg-[#f0f5ee]"
@@ -440,12 +445,13 @@ export default function CCTVPage() {
             </div>
           )}
 
-          {visibleNodes.map((node) => {
+          {cctvList.map((node, idx) => {
+            const isVisible = idx < visibleCount;
             const isAI = !!aiEnabled[node.id];
             return (
               <div
                 key={node.id}
-                className="flex-1 min-w-0 bg-white rounded-[36px] h-137.5 p-7 flex flex-col justify-between shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                className={`${isVisible ? "flex-1 min-w-0" : "hidden"} bg-white rounded-[36px] h-137.5 p-7 flex flex-col justify-between shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]`}
               >
                 {/* Card top */}
                 <div className="flex justify-between items-start">
