@@ -27,6 +27,8 @@ interface CCTVNode {
   jenis_kamera: string;
   created_at: string;
   zona: { id: string; nama: string };
+  latitude?: number;
+  longitude?: number;
 }
 
 interface BoundingBox {
@@ -122,6 +124,16 @@ export default function CCTVPage() {
     setTimeout(() => setToast(null), 2500);
   };
 
+  // CCTV CRUD modal state
+  const [cctvModalOpen, setCctvModalOpen]   = useState(false);
+  const [cctvEditTarget, setCctvEditTarget] = useState<CCTVNode | null>(null);
+  const [cctvForm, setCctvForm]             = useState({
+    nama: "", zona_id: "", jenis_kamera: "cctv",
+    stream_url: "", ip_address: "", latitude: "", longitude: "",
+  });
+  const [cctvSaving, setCctvSaving]       = useState(false);
+  const [cctvFormError, setCctvFormError] = useState("");
+
   const dropRef = useRef<HTMLDivElement>(null);
   const token   = () => localStorage.getItem("access_token") ?? "";
 
@@ -136,20 +148,21 @@ export default function CCTVPage() {
   }, []);
 
   // fetch CCTV
-  useEffect(() => {
-    (async () => {
-      const t = token();
-      if (!t) { setCctvLoading(false); return; }
-      try {
-        const res  = await fetch(`${BACKEND_URL}/api/cctv`, {
-          headers: { Authorization: `Bearer ${t}` },
-        });
-        const json = await res.json();
-        if (json.success) setCctvList(json.data);
-      } catch { /* pertahankan list kosong */ }
-      finally { setCctvLoading(false); }
-    })();
+  const fetchCctv = useCallback(async () => {
+    setCctvLoading(true);
+    const t = token();
+    if (!t) { setCctvLoading(false); return; }
+    try {
+      const res  = await fetch(`${BACKEND_URL}/api/cctv`, {
+        headers: { Authorization: `Bearer ${t}` },
+      });
+      const json = await res.json();
+      if (json.success) setCctvList(json.data);
+    } catch { /* pertahankan list kosong */ }
+    finally { setCctvLoading(false); }
   }, []);
+
+  useEffect(() => { fetchCctv(); }, [fetchCctv]);
 
   // fetch Zona
   const fetchZona = useCallback(async () => {
@@ -175,6 +188,93 @@ export default function CCTVPage() {
   const toggleAI = useCallback((cctv_id: string) => {
     setAiEnabled((prev) => ({ ...prev, [cctv_id]: !prev[cctv_id] }));
   }, []);
+
+  // ── CCTV CRUD ──────────────────────────────────────────────────────────────
+
+  function openAddCctv() {
+    setCctvEditTarget(null);
+    setCctvForm({ nama: "", zona_id: "", jenis_kamera: "cctv", stream_url: "", ip_address: "", latitude: "", longitude: "" });
+    setCctvFormError("");
+    setCctvModalOpen(true);
+  }
+
+  function openEditCctv(node: CCTVNode) {
+    setCctvEditTarget(node);
+    setCctvForm({
+      nama:         node.nama,
+      zona_id:      node.zona.id,
+      jenis_kamera: node.jenis_kamera,
+      stream_url:   node.stream_url,
+      ip_address:   node.ip_address,
+      latitude:     node.latitude  != null ? String(node.latitude)  : "",
+      longitude:    node.longitude != null ? String(node.longitude) : "",
+    });
+    setCctvFormError("");
+    setCctvModalOpen(true);
+  }
+
+  function closeModalCctv() {
+    setCctvModalOpen(false);
+    setCctvEditTarget(null);
+    setCctvFormError("");
+  }
+
+  async function handleSubmitCctv(e: React.SyntheticEvent) {
+    e.preventDefault();
+    if (!cctvForm.nama.trim())       { setCctvFormError("Nama kamera wajib diisi."); return; }
+    if (!cctvForm.zona_id)           { setCctvFormError("Zona wajib dipilih.");       return; }
+    if (!cctvForm.stream_url.trim()) { setCctvFormError("Stream URL wajib diisi.");   return; }
+    if (!cctvForm.ip_address.trim()) { setCctvFormError("IP Address wajib diisi.");   return; }
+    setCctvSaving(true);
+    setCctvFormError("");
+    try {
+      const body: Record<string, unknown> = {
+        nama:         cctvForm.nama,
+        zona_id:      cctvForm.zona_id,
+        jenis_kamera: cctvForm.jenis_kamera,
+        stream_url:   cctvForm.stream_url,
+        ip_address:   cctvForm.ip_address,
+      };
+      if (cctvForm.latitude)  body.latitude  = parseFloat(cctvForm.latitude);
+      if (cctvForm.longitude) body.longitude = parseFloat(cctvForm.longitude);
+
+      const url    = cctvEditTarget
+        ? `${BACKEND_URL}/api/cctv/${cctvEditTarget.id}`
+        : `${BACKEND_URL}/api/cctv`;
+      const method = cctvEditTarget ? "PATCH" : "POST";
+      const res    = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json();
+      if (!json.success) { setCctvFormError(json.message ?? "Gagal menyimpan."); return; }
+      closeModalCctv();
+      fetchCctv();
+      showToast(cctvEditTarget ? "Kamera berhasil diperbarui." : "Kamera berhasil ditambahkan.");
+    } catch {
+      setCctvFormError("Tidak bisa terhubung ke server.");
+    } finally {
+      setCctvSaving(false);
+    }
+  }
+
+  function handleDeleteCctv(node: CCTVNode) {
+    showConfirm(`Hapus kamera "${node.nama}"?`, async () => {
+      setDialog(null);
+      try {
+        const res  = await fetch(`${BACKEND_URL}/api/cctv/${node.id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token()}` },
+        });
+        const json = await res.json();
+        if (json.success) { fetchCctv(); showToast("Kamera berhasil dihapus."); }
+        else showAlert(json.message ?? "Gagal menghapus.");
+      } catch {
+        showAlert("Tidak bisa terhubung ke server.");
+      }
+    });
+  }
 
   // ── Zona CRUD ──────────────────────────────────────────────────────────────
 
@@ -284,6 +384,13 @@ export default function CCTVPage() {
               </div>
             </div>
 
+            <button
+              onClick={openAddCctv}
+              className="bg-white text-[#588157] font-black text-sm px-5 py-2 rounded-full hover:bg-[#f0f5ee] transition-colors duration-200 cursor-pointer border-none"
+            >
+              + Tambah Kamera
+            </button>
+
             {/* dropdown layout */}
             <div ref={dropRef} className="relative">
               <button
@@ -321,7 +428,7 @@ export default function CCTVPage() {
 
         {/* ── CCTV Grid ── */}
         <div className="bg-[#CADBB7] rounded-[45px] p-7 flex gap-5 items-stretch">
-          {cctvLoading && (
+          {cctvLoading && cctvList.length === 0 && (
             <div className="flex-1 flex items-center justify-center">
               <p className="text-[#588157] font-bold opacity-50">Memuat kamera...</p>
             </div>
@@ -333,7 +440,7 @@ export default function CCTVPage() {
             </div>
           )}
 
-          {!cctvLoading && visibleNodes.map((node) => {
+          {visibleNodes.map((node) => {
             const isAI = !!aiEnabled[node.id];
             return (
               <div
@@ -388,24 +495,40 @@ export default function CCTVPage() {
                 </div>
 
                 {/* Card bottom */}
-                <div className="flex items-end justify-between">
-                  <div>
-                    <p className="font-black text-sm m-0 text-black">{node.jenis_kamera.toUpperCase()}</p>
-                    <p className="font-bold text-[11px] m-0 text-[#666] font-mono tracking-[0.03em]">
-                      {node.ip_address}
-                    </p>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-black text-sm m-0 text-black">{node.jenis_kamera.toUpperCase()}</p>
+                      <p className="font-bold text-[11px] m-0 text-[#666] font-mono tracking-[0.03em]">
+                        {node.ip_address}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => toggleAI(node.id)}
+                      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-black border-2 transition-all duration-200 cursor-pointer ${
+                        isAI
+                          ? "bg-[#588157] border-[#588157] text-white"
+                          : "bg-white border-[#ddd] text-[#aaa] hover:border-[#a3b18a] hover:text-[#588157]"
+                      }`}
+                    >
+                      <span>{isAI ? "🤖" : "🎥"}</span>
+                      <span>{isAI ? "AI ON" : "AI OFF"}</span>
+                    </button>
                   </div>
-                  <button
-                    onClick={() => toggleAI(node.id)}
-                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-black border-2 transition-all duration-200 cursor-pointer ${
-                      isAI
-                        ? "bg-[#588157] border-[#588157] text-white"
-                        : "bg-white border-[#ddd] text-[#aaa] hover:border-[#a3b18a] hover:text-[#588157]"
-                    }`}
-                  >
-                    <span>{isAI ? "🤖" : "🎥"}</span>
-                    <span>{isAI ? "AI ON" : "AI OFF"}</span>
-                  </button>
+                  <div className="flex gap-2 pt-2 border-t border-[#f0f0f0]">
+                    <button
+                      onClick={() => openEditCctv(node)}
+                      className="flex-1 py-1.5 rounded-full text-[11px] font-black border-2 border-[#a3b18a] text-[#588157] bg-white hover:bg-[#f0f5ee] transition-colors duration-150 cursor-pointer"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCctv(node)}
+                      className="flex-1 py-1.5 rounded-full text-[11px] font-black border-2 border-red-200 text-red-400 bg-white hover:bg-red-50 transition-colors duration-150 cursor-pointer"
+                    >
+                      Hapus
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -562,6 +685,150 @@ export default function CCTVPage() {
                 {dialog.type === "confirm" ? "Hapus" : "OK"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal CCTV ── */}
+      {cctvModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModalCctv(); }}
+        >
+          <div className="bg-white rounded-[28px] p-8 w-full max-w-2xl shadow-[0_20px_60px_rgba(0,0,0,0.2)]">
+            <p className="m-0 font-black text-lg text-black">
+              {cctvEditTarget ? "Edit Kamera" : "Tambah Kamera"}
+            </p>
+            <p className="m-0 mt-1 text-xs text-[#888]">
+              {cctvEditTarget ? `ID: ${cctvEditTarget.id}` : "Data kamera baru"}
+            </p>
+
+            <form onSubmit={handleSubmitCctv} className="mt-6 flex flex-col gap-4">
+              {/* Nama */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-[#555] tracking-wide">
+                  NAMA KAMERA <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={cctvForm.nama}
+                  onChange={(e) => setCctvForm((p) => ({ ...p, nama: e.target.value }))}
+                  placeholder="cth. Kamera Pintu Utara..."
+                  className="border-2 border-[#e0e0e0] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-[#588157] transition-colors"
+                />
+              </div>
+
+              {/* Zona + Jenis — satu baris */}
+              <div className="flex gap-3">
+                <div className="flex flex-col gap-1.5 flex-1">
+                  <label className="text-xs font-extrabold text-[#555] tracking-wide">
+                    ZONA <span className="text-red-400">*</span>
+                  </label>
+                  <select
+                    value={cctvForm.zona_id}
+                    onChange={(e) => setCctvForm((p) => ({ ...p, zona_id: e.target.value }))}
+                    className="border-2 border-[#e0e0e0] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-[#588157] transition-colors bg-white"
+                  >
+                    <option value="">— Pilih Zona —</option>
+                    {zonaList.map((z) => (
+                      <option key={z.id} value={z.id}>{z.nama}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5 flex-1">
+                  <label className="text-xs font-extrabold text-[#555] tracking-wide">
+                    JENIS KAMERA <span className="text-red-400">*</span>
+                  </label>
+                  <select
+                    value={cctvForm.jenis_kamera}
+                    onChange={(e) => setCctvForm((p) => ({ ...p, jenis_kamera: e.target.value }))}
+                    className="border-2 border-[#e0e0e0] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-[#588157] transition-colors bg-white"
+                  >
+                    <option value="cctv">CCTV</option>
+                    <option value="ponsel">Ponsel</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Stream URL */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-[#555] tracking-wide">
+                  STREAM URL <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={cctvForm.stream_url}
+                  onChange={(e) => setCctvForm((p) => ({ ...p, stream_url: e.target.value }))}
+                  placeholder="cth. http://192.168.1.x:4747/video"
+                  className="border-2 border-[#e0e0e0] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-[#588157] transition-colors font-mono"
+                />
+              </div>
+
+              {/* IP Address */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-[#555] tracking-wide">
+                  IP ADDRESS <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={cctvForm.ip_address}
+                  onChange={(e) => setCctvForm((p) => ({ ...p, ip_address: e.target.value }))}
+                  placeholder="cth. 192.168.1.100"
+                  className="border-2 border-[#e0e0e0] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-[#588157] transition-colors font-mono"
+                />
+              </div>
+
+              {/* Latitude + Longitude — opsional */}
+              <div className="flex gap-3">
+                <div className="flex flex-col gap-1.5 flex-1">
+                  <label className="text-xs font-extrabold text-[#555] tracking-wide">
+                    LATITUDE <span className="text-[#bbb] font-semibold normal-case tracking-normal">(opsional)</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={cctvForm.latitude}
+                    onChange={(e) => setCctvForm((p) => ({ ...p, latitude: e.target.value }))}
+                    placeholder="-6.200000"
+                    className="border-2 border-[#e0e0e0] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-[#588157] transition-colors"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5 flex-1">
+                  <label className="text-xs font-extrabold text-[#555] tracking-wide">
+                    LONGITUDE <span className="text-[#bbb] font-semibold normal-case tracking-normal">(opsional)</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={cctvForm.longitude}
+                    onChange={(e) => setCctvForm((p) => ({ ...p, longitude: e.target.value }))}
+                    placeholder="106.816666"
+                    className="border-2 border-[#e0e0e0] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-[#588157] transition-colors"
+                  />
+                </div>
+              </div>
+
+              {cctvFormError && (
+                <p className="m-0 text-xs text-red-500 font-bold">{cctvFormError}</p>
+              )}
+
+              <div className="flex gap-3 mt-2">
+                <button
+                  type="button"
+                  onClick={closeModalCctv}
+                  className="flex-1 py-2.5 rounded-full text-sm font-black border-2 border-[#ddd] text-[#888] bg-white hover:bg-[#f5f5f5] transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={cctvSaving}
+                  className="flex-1 py-2.5 rounded-full text-sm font-black bg-[#588157] text-white border-none hover:bg-[#4a6d48] transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {cctvSaving ? "Menyimpan..." : cctvEditTarget ? "Simpan" : "Tambah"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
