@@ -384,7 +384,7 @@ export default function CCTVPage() {
             return (
               <div
                 key={node.id}
-                className="bg-white rounded-[36px] h-137.5 p-7 flex flex-col justify-between shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
+                className="bg-white rounded-[36px] p-7 flex flex-col gap-4 shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
               >
                 {/* Card top */}
                 <div className="flex justify-between items-start">
@@ -403,7 +403,7 @@ export default function CCTVPage() {
                 </div>
 
                 {/* Preview + bounding box overlay */}
-                <div className="relative flex-1 bg-[#f0f0f0] rounded-3xl my-4 overflow-hidden flex items-center justify-center">
+                <div className="relative aspect-video bg-[#f0f0f0] rounded-3xl overflow-hidden flex items-center justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={node.stream_url.replace(/\/video$/, "/mjpegfeed")}
