@@ -324,6 +324,10 @@ export default function CCTVPage() {
     });
   }
 
+  // ── Tab ────────────────────────────────────────────────────────────────────
+
+  const [activeTab, setActiveTab] = useState<"cctv" | "zona">("cctv");
+
   // ── Derived ────────────────────────────────────────────────────────────────
 
   const sortedZona   = [...zonaList].sort((a, b) =>
@@ -338,35 +342,86 @@ export default function CCTVPage() {
     <div className="flex min-h-screen w-full">
       <Sidebar />
 
-      <main className="flex-1 bg-[#588157] p-8 flex flex-col gap-6">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#588157]">
 
-        {/* ── CCTV Header ── */}
-        <header className="flex justify-between items-center">
-          <span className="text-white font-extrabold text-xl tracking-[0.05em]">
-            CCTV MONITOR
-          </span>
+        {/* ── Sticky top bar ── */}
+        <div className="px-8 pt-8 flex flex-col gap-5">
 
-          <div className="flex items-center gap-4">
-            <div className="bg-[#a3b18a] py-1.5 px-5 rounded-full flex items-center gap-3 text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
-              <div className="w-10 h-10 bg-[#eee] rounded-full border-2 border-[#333] shrink-0" />
-              <div className="leading-[1.2]">
-                <p className="font-extrabold m-0 text-[15px]">ATUN</p>
-                <p className="text-[10px] m-0 opacity-80">OWNER</p>
+          {/* Header */}
+          <header className="flex justify-between items-center">
+            <span className="text-white font-extrabold text-xl tracking-[0.05em]">
+              CCTV MONITOR
+            </span>
+
+            <div className="flex items-center gap-4">
+              <div className="bg-[#a3b18a] py-1.5 px-5 rounded-full flex items-center gap-3 text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
+                <div className="w-10 h-10 bg-[#eee] rounded-full border-2 border-[#333] shrink-0" />
+                <div className="leading-[1.2]">
+                  <p className="font-extrabold m-0 text-[15px]">ATUN</p>
+                  <p className="text-[10px] m-0 opacity-80">OWNER</p>
+                </div>
               </div>
+
+              {activeTab === "cctv" && (
+                <button
+                  onClick={openAddCctv}
+                  className="bg-white text-[#588157] font-black text-sm px-5 py-2 rounded-full hover:bg-[#f0f5ee] transition-colors duration-200 cursor-pointer border-none"
+                >
+                  + Tambah Kamera
+                </button>
+              )}
+
+              {activeTab === "zona" && (
+                <div className="flex items-center gap-3">
+                  <div className="flex bg-[#4a6d48] rounded-full p-1 gap-1">
+                    {(["asc", "desc"] as const).map((order) => (
+                      <button
+                        key={order}
+                        onClick={() => setSortOrder(order)}
+                        className={`px-3.5 py-1 rounded-full text-[11px] font-black border-none cursor-pointer transition-all duration-200 ${
+                          sortOrder === order
+                            ? "bg-white text-[#588157]"
+                            : "bg-transparent text-white/70 hover:text-white"
+                        }`}
+                      >
+                        {order === "asc" ? "A → Z" : "Z → A"}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={openAdd}
+                    className="bg-white text-[#588157] font-black text-sm px-5 py-2 rounded-full hover:bg-[#f0f5ee] transition-colors duration-200 cursor-pointer border-none"
+                  >
+                    + Tambah Zona
+                  </button>
+                </div>
+              )}
             </div>
+          </header>
 
-            <button
-              onClick={openAddCctv}
-              className="bg-white text-[#588157] font-black text-sm px-5 py-2 rounded-full hover:bg-[#f0f5ee] transition-colors duration-200 cursor-pointer border-none"
-            >
-              + Tambah Kamera
-            </button>
-
+          {/* Vercel-style tabs */}
+          <div className="flex border-b border-white/20">
+            {(["cctv", "zona"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 pb-3 text-sm font-bold border-b-2 -mb-px bg-transparent border-x-0 border-t-0 cursor-pointer transition-colors duration-150 ${
+                  activeTab === tab
+                    ? "text-white border-b-white"
+                    : "text-white/50 border-b-transparent hover:text-white/80"
+                }`}
+              >
+                {tab === "cctv" ? "CCTV" : "Zona"}
+              </button>
+            ))}
           </div>
-        </header>
+        </div>
+
+        {/* ── Scrollable content ── */}
+        <div className="flex-1 overflow-y-auto px-8 py-6">
 
         {/* ── CCTV Grid ── */}
-        <div className="bg-[#CADBB7] rounded-[45px] p-7 grid grid-cols-2 gap-5">
+        {activeTab === "cctv" && <div className="bg-[#CADBB7] rounded-[45px] p-7 grid grid-cols-2 gap-5">
           {cctvLoading && cctvList.length === 0 && (
             <div className="col-span-2 flex items-center justify-center py-10">
               <p className="text-[#588157] font-bold opacity-50">Memuat kamera...</p>
@@ -472,41 +527,10 @@ export default function CCTVPage() {
               </div>
             );
           })}
-        </div>
-
-        {/* ── Zona Header ── */}
-        <div className="flex justify-between items-center">
-          <span className="text-white font-extrabold text-xl tracking-[0.05em]">
-            ZONA MONITORING
-          </span>
-          <div className="flex items-center gap-3">
-            {/* Sort toggle */}
-            <div className="flex bg-[#4a6d48] rounded-full p-1 gap-1">
-              {(["asc", "desc"] as const).map((order) => (
-                <button
-                  key={order}
-                  onClick={() => setSortOrder(order)}
-                  className={`px-3.5 py-1 rounded-full text-[11px] font-black border-none cursor-pointer transition-all duration-200 ${
-                    sortOrder === order
-                      ? "bg-white text-[#588157]"
-                      : "bg-transparent text-white/70 hover:text-white"
-                  }`}
-                >
-                  {order === "asc" ? "A → Z" : "Z → A"}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={openAdd}
-              className="bg-white text-[#588157] font-black text-sm px-5 py-2 rounded-full hover:bg-[#f0f5ee] transition-colors duration-200 cursor-pointer border-none"
-            >
-              + Tambah Zona
-            </button>
-          </div>
-        </div>
+        </div>}
 
         {/* ── Zona Grid ── */}
-        <div className="bg-[#CADBB7] rounded-[45px] p-7">
+        {activeTab === "zona" && <div className="bg-[#CADBB7] rounded-[45px] p-7">
           {zonaLoading && (
             <div className="flex items-center justify-center py-10">
               <p className="text-[#588157] font-bold opacity-50">Memuat zona...</p>
@@ -583,7 +607,9 @@ export default function CCTVPage() {
               })}
             </div>
           )}
-        </div>
+        </div>}
+
+        </div>{/* end scrollable content */}
       </main>
 
       {/* ── Toast notifikasi sukses ── */}
