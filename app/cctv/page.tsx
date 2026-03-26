@@ -403,7 +403,7 @@ export default function CCTVPage() {
                 </div>
 
                 {/* Preview + bounding box overlay */}
-                <div className="relative aspect-video bg-[#f0f0f0] rounded-3xl overflow-hidden flex items-center justify-center">
+                <div className="relative aspect-square bg-[#f0f0f0] rounded-3xl overflow-hidden flex items-center justify-center">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={node.stream_url.replace(/\/video$/, "/mjpegfeed")}
