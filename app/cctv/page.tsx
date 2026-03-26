@@ -1,18 +1,10 @@
 "use client";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Sidebar } from "@/components/Sidebar";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-type ViewMode = "single" | "dual" | "triple";
-
-const VIEW_OPTIONS: { label: string; value: ViewMode; desc: string }[] = [
-  { label: "Single View", value: "single", desc: "1×1" },
-  { label: "Dual View",   value: "dual",   desc: "1×2" },
-  { label: "Triple View", value: "triple", desc: "1×3" },
-];
 
 const DUMMY_LABELS = ["kaleng kosong", "bungkus permen", "botol plastik", "kantong kresek"];
 
@@ -89,8 +81,6 @@ function repLabel(score: number) {
 
 export default function CCTVPage() {
   // CCTV state
-  const [viewMode, setViewMode] = useState<ViewMode>("dual");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [cctvList, setCctvList]         = useState<CCTVNode[]>([]);
   const [cctvLoading, setCctvLoading]   = useState(true);
   const [aiEnabled, setAiEnabled]       = useState<Record<string, boolean>>({});
@@ -134,24 +124,7 @@ export default function CCTVPage() {
   const [cctvSaving, setCctvSaving]       = useState(false);
   const [cctvFormError, setCctvFormError] = useState("");
 
-  const dropRef = useRef<HTMLDivElement>(null);
   const token   = () => localStorage.getItem("access_token") ?? "";
-
-  // load view mode dari localStorage setelah hydration
-  useEffect(() => {
-    const saved = localStorage.getItem("cctv_view_mode") as ViewMode | null;
-    if (saved) setViewMode(saved);
-  }, []);
-
-  // tutup layout-dropdown kalau klik luar
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (dropRef.current && !dropRef.current.contains(e.target as Node))
-        setDropdownOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
 
   // fetch CCTV
   const fetchCctv = useCallback(async () => {
@@ -353,8 +326,6 @@ export default function CCTVPage() {
 
   // ── Derived ────────────────────────────────────────────────────────────────
 
-  const visibleCount = viewMode === "single" ? 1 : viewMode === "dual" ? 2 : 3;
-  const currentView  = VIEW_OPTIONS.find((v) => v.value === viewMode)!;
   const sortedZona   = [...zonaList].sort((a, b) =>
     sortOrder === "asc"
       ? a.nama.localeCompare(b.nama, "id")
@@ -371,14 +342,9 @@ export default function CCTVPage() {
 
         {/* ── CCTV Header ── */}
         <header className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <span className="text-white font-extrabold text-xl tracking-[0.05em]">
-              CCTV MONITOR
-            </span>
-            <span className="bg-[#a3b18a] text-white px-3.5 py-1.25 rounded-[20px] text-xs font-bold">
-              {currentView.label} · {currentView.desc}
-            </span>
-          </div>
+          <span className="text-white font-extrabold text-xl tracking-[0.05em]">
+            CCTV MONITOR
+          </span>
 
           <div className="flex items-center gap-4">
             <div className="bg-[#a3b18a] py-1.5 px-5 rounded-full flex items-center gap-3 text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
@@ -396,62 +362,29 @@ export default function CCTVPage() {
               + Tambah Kamera
             </button>
 
-            {/* dropdown layout */}
-            <div ref={dropRef} className="relative">
-              <button
-                onClick={() => setDropdownOpen((o) => !o)}
-                className="text-[26px] font-bold cursor-pointer text-white bg-transparent border-none leading-none px-2.5 py-1.5 rounded-[10px] transition-colors duration-200 hover:bg-white/18"
-              >
-                ⋮
-              </button>
-              {dropdownOpen && (
-                <div className="absolute top-[calc(100%+8px)] right-0 bg-white rounded-[18px] shadow-[0_8px_32px_rgba(0,0,0,0.18)] overflow-hidden min-w-47.5 z-100">
-                  <p className="m-0 px-4 pt-3 pb-2 text-[10px] font-extrabold text-[#aaa] tracking-widest uppercase">
-                    Layout View
-                  </p>
-                  {VIEW_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => { setViewMode(opt.value); localStorage.setItem("cctv_view_mode", opt.value); setDropdownOpen(false); }}
-                      className={`w-full px-4 py-2.75 border-none cursor-pointer text-left font-semibold text-sm flex justify-between items-center transition-colors duration-150 hover:bg-[#f5f5f5] ${
-                        viewMode === opt.value
-                          ? "bg-[#f0f5ee] text-[#588157] font-extrabold hover:bg-[#f0f5ee]"
-                          : "bg-white text-[#333]"
-                      }`}
-                    >
-                      <span>{opt.label}</span>
-                      <span className={`text-[11px] font-semibold ${viewMode === opt.value ? "text-[#a3b18a]" : "text-[#bbb]"}`}>
-                        {opt.desc}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
         </header>
 
         {/* ── CCTV Grid ── */}
-        <div className="bg-[#CADBB7] rounded-[45px] p-7 flex gap-5 items-stretch">
+        <div className="bg-[#CADBB7] rounded-[45px] p-7 grid grid-cols-2 gap-5">
           {cctvLoading && cctvList.length === 0 && (
-            <div className="flex-1 flex items-center justify-center">
+            <div className="col-span-2 flex items-center justify-center py-10">
               <p className="text-[#588157] font-bold opacity-50">Memuat kamera...</p>
             </div>
           )}
 
           {!cctvLoading && cctvList.length === 0 && (
-            <div className="flex-1 flex items-center justify-center">
+            <div className="col-span-2 flex items-center justify-center py-10">
               <p className="text-[#588157] font-bold opacity-50">Belum ada kamera terdaftar.</p>
             </div>
           )}
 
-          {cctvList.map((node, idx) => {
-            const isVisible = idx < visibleCount;
+          {cctvList.map((node) => {
             const isAI = !!aiEnabled[node.id];
             return (
               <div
                 key={node.id}
-                className={`${isVisible ? "flex-1 min-w-0" : "hidden"} bg-white rounded-[36px] h-137.5 p-7 flex flex-col justify-between shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)]`}
+                className="bg-white rounded-[36px] h-137.5 p-7 flex flex-col justify-between shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
               >
                 {/* Card top */}
                 <div className="flex justify-between items-start">
