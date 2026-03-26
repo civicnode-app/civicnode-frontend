@@ -354,14 +354,6 @@ export default function CCTVPage() {
             </span>
 
             <div className="flex items-center gap-4">
-              <div className="bg-[#a3b18a] py-1.5 px-5 rounded-full flex items-center gap-3 text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
-                <div className="w-10 h-10 bg-[#eee] rounded-full border-2 border-[#333] shrink-0" />
-                <div className="leading-[1.2]">
-                  <p className="font-extrabold m-0 text-[15px]">ATUN</p>
-                  <p className="text-[10px] m-0 opacity-80">OWNER</p>
-                </div>
-              </div>
-
               {activeTab === "cctv" && (
                 <button
                   onClick={openAddCctv}
@@ -396,19 +388,27 @@ export default function CCTVPage() {
                   </button>
                 </div>
               )}
+
+              <div className="bg-[#a3b18a] py-1.5 px-5 rounded-full flex items-center gap-3 text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
+                <div className="w-10 h-10 bg-[#eee] rounded-full border-2 border-[#333] shrink-0" />
+                <div className="leading-[1.2]">
+                  <p className="font-extrabold m-0 text-[15px]">ATUN</p>
+                  <p className="text-[10px] m-0 opacity-80">OWNER</p>
+                </div>
+              </div>
             </div>
           </header>
 
-          {/* Vercel-style tabs */}
-          <div className="flex border-b border-white/20">
+          {/* Badge-style tabs */}
+          <div className="flex gap-2 pb-3">
             {(["cctv", "zona"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 pb-3 text-sm font-bold border-b-2 -mb-px bg-transparent border-x-0 border-t-0 cursor-pointer transition-colors duration-150 ${
+                className={`px-4 py-1.5 rounded-full text-sm font-bold border-none cursor-pointer transition-all duration-150 ${
                   activeTab === tab
-                    ? "text-white border-b-white"
-                    : "text-white/50 border-b-transparent hover:text-white/80"
+                    ? "bg-white text-[#588157]"
+                    : "bg-white/15 text-white/70 hover:bg-white/25 hover:text-white"
                 }`}
               >
                 {tab === "cctv" ? "CCTV" : "Zona"}
