@@ -45,7 +45,7 @@
 
 ### Yang Masih Perlu Diperbaiki
 
-- 🐛 **Dropdown resolusi CCTV** — ganti resolusi tidak reload stream otomatis. Fix: force remount `<img>` dengan `key` prop yang berubah saat resolusi diganti
+- ~~Dropdown resolusi CCTV~~ — diputuskan tidak jadi dibikin (over-engineering)
 
 ---
 
@@ -62,7 +62,6 @@
 
 ## Yang Belum Dikerjain
 
-- [ ] **Dropdown resolusi CCTV** — fix force remount stream saat resolusi diganti
 - [ ] **Guard route** — redirect ke `/sign-in` kalau tidak ada token
 - [ ] **System Config page** — review apakah perlu disambungkan ke backend
 - [ ] **Ganti dev endpoints** — setelah AI server nyambung: ganti `/api/dev/stats` dan `/api/dev/timeline-log` ke endpoint real

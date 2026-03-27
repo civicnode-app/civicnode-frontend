@@ -57,6 +57,15 @@ export function StreamImg({ src, onLoad }: Props) {
     }, 2000);
   }
 
+  async function handleError() {
+    // Kalau 404 (kamera dihapus / tidak ada), jangan retry
+    try {
+      const res = await fetch(src, { method: "HEAD" });
+      if (res.status === 404) return;
+    } catch {}
+    scheduleRetry();
+  }
+
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -68,7 +77,7 @@ export function StreamImg({ src, onLoad }: Props) {
         if (retryRef.current) clearTimeout(retryRef.current);
         onLoad();
       }}
-      onError={scheduleRetry}
+      onError={handleError}
     />
   );
 }

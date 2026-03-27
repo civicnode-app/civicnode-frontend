@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { getAuthToken } from "@/lib/auth";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
 
@@ -34,7 +35,7 @@ export default function ZonaPage() {
   const [saving, setSaving]       = useState(false);
   const [error, setError]         = useState("");
 
-  const token = () => localStorage.getItem("access_token") ?? "";
+  const token = () => getAuthToken();
 
   const fetchZona = useCallback(async () => {
     setLoading(true);

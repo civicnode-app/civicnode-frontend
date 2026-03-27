@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { setAuthToken } from "@/lib/auth";
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
@@ -15,7 +16,7 @@ export default function SignIn() {
     const accessToken = params.get("access_token");
     const refreshToken = params.get("refresh_token");
     if (accessToken) {
-      localStorage.setItem("access_token", accessToken);
+      setAuthToken(accessToken);
       if (refreshToken) localStorage.setItem("refresh_token", refreshToken);
       window.history.replaceState({}, "", window.location.pathname);
       router.push("/dashboard");
@@ -112,7 +113,7 @@ export default function SignIn() {
       const {
         data: { access_token },
       } = await res.json();
-      localStorage.setItem("access_token", access_token);
+      setAuthToken(access_token);
       // redirect ke dashboard
       router.push("/dashboard");
     } catch (err) {

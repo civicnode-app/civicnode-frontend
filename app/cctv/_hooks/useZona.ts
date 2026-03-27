@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { Zona, BACKEND_URL } from "../_types";
+import { getAuthToken } from "@/lib/auth";
 
 type ZonaForm = { nama: string; deskripsi: string };
 
@@ -22,7 +23,7 @@ export function useZona({ showToast, showAlert, showConfirm, closeDialog }: Opti
   const [saving, setSaving]         = useState(false);
   const [formError, setFormError]   = useState("");
 
-  const token = () => localStorage.getItem("access_token") ?? "";
+  const token = () => getAuthToken();
 
   const fetchZona = useCallback(async () => {
     setZonaLoading(true);

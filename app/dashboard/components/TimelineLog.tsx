@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useDashboardStore, type TimelineLogEntry } from "@/stores/dashboardStore";
+import { getAuthToken } from "@/lib/auth";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
 
@@ -24,7 +25,7 @@ export default function TimelineLog() {
 
   useEffect(() => {
     const fetchLogs = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = getAuthToken();
       if (!token) return;
 
       setTimelineLoading(true);

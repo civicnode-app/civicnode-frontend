@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { getAuthToken } from "@/lib/auth";
 import { CCTVNode, BoundingBox, BACKEND_URL } from "../_types";
 
 const DUMMY_LABELS = ["kaleng kosong", "bungkus permen", "botol plastik", "kantong kresek"];
@@ -55,7 +56,7 @@ export function useCctv({ showToast, showAlert, showConfirm, closeDialog }: Opti
   const [saving, setSaving]           = useState(false);
   const [formError, setFormError]     = useState("");
 
-  const token = () => localStorage.getItem("access_token") ?? "";
+  const token = () => getAuthToken();
 
   const fetchCctv = useCallback(async () => {
     setCctvLoading(true);

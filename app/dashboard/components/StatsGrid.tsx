@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ScoreRing from "./ScoreRing";
+import { getAuthToken } from "@/lib/auth";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
 const POLL_INTERVAL = 1000;
@@ -21,7 +22,7 @@ export default function StatsGrid() {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = getAuthToken();
       if (!token) return;
 
       try {
