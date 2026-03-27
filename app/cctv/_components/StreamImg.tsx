@@ -61,7 +61,7 @@ export function StreamImg({ src, onLoad }: Props) {
     // eslint-disable-next-line @next/next/no-img-element
     <img
       ref={ref}
-      src={activeSrc}
+      src={activeSrc || undefined}
       alt=""
       className="absolute inset-0 w-full h-full object-cover"
       onLoad={() => {
