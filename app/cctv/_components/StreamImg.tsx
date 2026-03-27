@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Props {
   src: string;
@@ -7,41 +7,52 @@ interface Props {
 }
 
 // DroidCam hanya support 1 koneksi MJPEG per kamera.
-// Dua skenario yang bikin error "Error creating image encoder":
 //
-//   1. Page reload  — browser kirim request baru sebelum TCP lama bener-bener
-//      tutup di sisi DroidCam. Fix: beforeunload listener yang set src="" agar
-//      browser abort koneksi sebelum halaman di-destroy.
+// Problem utama: waktu tab/halaman ganti, React langsung mount instance baru
+// hampir bersamaan dengan unmount instance lama. Browser belum sempat proses
+// abort koneksi lama sebelum request baru masuk → DroidCam reject.
 //
-//   2. Reconnect    — kalau DroidCam masih menolak (koneksi lama belum sepenuhnya
-//      dilepas), onError akan jadwalkan retry setiap 2 detik sampai berhasil.
+// Solusi:
+//   1. activeSrc mulai dari "" (tidak langsung connect saat mount)
+//   2. Delay 300ms sebelum set activeSrc → beri waktu browser abort koneksi lama
+//   3. beforeunload listener → abort eksplisit saat page reload/close
+//   4. onError + retry 2s → kalau DroidCam masih reject, coba lagi otomatis
 
 export function StreamImg({ src, onLoad }: Props) {
-  const ref       = useRef<HTMLImageElement>(null);
-  const retryRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const mounted   = useRef(true);
+  const [activeSrc, setActiveSrc] = useState("");
+  const ref      = useRef<HTMLImageElement>(null);
+  const retryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mounted  = useRef(true);
 
   useEffect(() => {
     mounted.current = true;
 
-    const close = () => { if (ref.current) ref.current.src = ""; };
+    const initTimer = setTimeout(() => {
+      if (mounted.current) setActiveSrc(src);
+    }, 300);
+
+    const close = () => {
+      if (ref.current) ref.current.src = "";
+    };
     window.addEventListener("beforeunload", close);
 
     return () => {
       mounted.current = false;
-      window.removeEventListener("beforeunload", close);
-      close();
+      clearTimeout(initTimer);
       if (retryRef.current) clearTimeout(retryRef.current);
+      window.removeEventListener("beforeunload", close);
+      setActiveSrc("");
+      close();
     };
-  }, []);
+  }, [src]);
 
   function scheduleRetry() {
     if (retryRef.current) clearTimeout(retryRef.current);
     retryRef.current = setTimeout(() => {
-      if (!mounted.current || !ref.current) return;
-      ref.current.src = "";
+      if (!mounted.current) return;
+      setActiveSrc("");
       setTimeout(() => {
-        if (mounted.current && ref.current) ref.current.src = src;
+        if (mounted.current) setActiveSrc(src);
       }, 50);
     }, 2000);
   }
@@ -50,7 +61,7 @@ export function StreamImg({ src, onLoad }: Props) {
     // eslint-disable-next-line @next/next/no-img-element
     <img
       ref={ref}
-      src={src}
+      src={activeSrc}
       alt=""
       className="absolute inset-0 w-full h-full object-cover"
       onLoad={() => {
