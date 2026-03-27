@@ -28,6 +28,12 @@
 
 - ✅ **Docs** — tambah `docs/cctv-layout-simplification.md`
 
+#### AI Server Integration
+
+- ✅ **`app/cctv/_types.ts`** — tambah `AI_SERVER_URL` dari `NEXT_PUBLIC_AI_SERVER_URL` env var
+- ✅ **`app/cctv/_components/CctvCard.tsx`** — stream src pakai AI server URL kalau `AI_SERVER_URL` tersedia, fallback ke DroidCam `/mjpegfeed` kalau tidak
+- ✅ **`.env.example`** — tambah `NEXT_PUBLIC_AI_SERVER_URL=http://localhost:5001`
+
 ---
 
 ## Sesi 2026-03-26
@@ -65,6 +71,7 @@
 
 ## Catatan Penting
 
-- Stream MJPEG berjalan **langsung dari browser ke DroidCam** (tidak lewat backend) — stream URL adalah local IP, hanya bisa diakses dalam satu jaringan
-- DroidCam hanya support **1 koneksi MJPEG per kamera** — jangan buka dua tab sekaligus
-- `AI_SERVER_SECRET` wajib diisi di `.env` backend sebelum koneksi AI server bisa jalan
+- Stream MJPEG berjalan dari **AI server** ke browser (bukan langsung ke DroidCam) — AI server yang connect ke DroidCam, browser ambil stream ber-bounding-box dari AI server
+- Kalau `NEXT_PUBLIC_AI_SERVER_URL` tidak diset, frontend fallback ke DroidCam stream langsung
+- DroidCam hanya support **1 koneksi MJPEG per kamera** — jangan buka dua tab dan jangan frontend+AI server connect bersamaan ke DroidCam
+- `AI_SERVER_SECRET` wajib sama di `.env` backend dan `.env` AI server

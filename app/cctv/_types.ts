@@ -1,4 +1,5 @@
-export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
+export const BACKEND_URL    = process.env.NEXT_PUBLIC_BACKEND_URL    ?? "http://localhost:3001";
+export const AI_SERVER_URL  = process.env.NEXT_PUBLIC_AI_SERVER_URL  ?? "";
 
 export interface CCTVNode {
   id: string;
