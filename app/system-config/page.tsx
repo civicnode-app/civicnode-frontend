@@ -40,10 +40,6 @@ export default function SystemConfigPage() {
       <main className="flex-1 bg-[#588157] p-8 flex flex-col gap-6">
         {/* Header */}
         <header className="flex justify-end items-center gap-4">
-          <div className="text-[22px] cursor-pointer relative leading-none">
-            🔔
-            <div className="absolute top-0 right-0 w-2.25 h-2.25 bg-red-500 rounded-full border-2 border-[#588157]"></div>
-          </div>
           <div className="bg-[#a3b18a] py-1.5 px-5 rounded-full flex items-center gap-3 text-white">
             <div className="w-9.5 h-9.5 bg-[#eee] rounded-full border-2 border-[#333] shrink-0"></div>
             <div className="leading-[1.3]">
