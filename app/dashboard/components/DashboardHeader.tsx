@@ -13,12 +13,6 @@ export default function DashboardHeader() {
 
       {/* Right actions */}
       <div className="flex items-center gap-4">
-        {/* Bell */}
-        <div className="text-[22px] cursor-pointer relative leading-none">
-          🔔
-          <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-[#588157]" />
-        </div>
-
         {/* Profile */}
         <div className="bg-[#a3b18a] px-5 py-1.5 rounded-full flex items-center gap-2.5 text-white">
           <div className="w-9.5 h-9.5 bg-[#eee] rounded-full border-2 border-[#333] shrink-0" />

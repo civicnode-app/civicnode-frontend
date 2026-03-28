@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { WalletAvatar } from "@/components/WalletAvatar";
 import { getAuthToken } from "@/lib/auth";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
@@ -41,7 +42,10 @@ export default function SystemConfigPage() {
         {/* Header */}
         <header className="flex justify-end items-center gap-4">
           <div className="bg-[#a3b18a] py-1.5 px-5 rounded-full flex items-center gap-3 text-white">
-            <div className="w-9.5 h-9.5 bg-[#eee] rounded-full border-2 border-[#333] shrink-0"></div>
+            {profile?.wallet_address
+              ? <WalletAvatar address={profile.wallet_address} size={38} className="border-2 border-[#333]" />
+              : <div className="w-9.5 h-9.5 bg-[#eee] rounded-full border-2 border-[#333] shrink-0" />
+            }
             <div className="leading-[1.3]">
               <p className="font-extrabold m-0 text-sm">
                 {profile?.full_name ?? "—"}
@@ -62,7 +66,10 @@ export default function SystemConfigPage() {
                 👤 PROFILE
               </p>
               <div className="flex items-center gap-3.5 mt-3.5">
-                <div className="w-13 h-13 bg-[#DAD7CD] rounded-full border-[3px] border-[#588157] shrink-0"></div>
+                {profile?.wallet_address
+                  ? <WalletAvatar address={profile.wallet_address} size={52} className="border-[3px] border-[#588157]" />
+                  : <div className="w-13 h-13 bg-[#DAD7CD] rounded-full border-[3px] border-[#588157] shrink-0" />
+                }
                 <div>
                   <p className="m-0 font-black text-[16px]">
                     {profile?.full_name ?? "—"}

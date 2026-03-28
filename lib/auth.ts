@@ -17,3 +17,13 @@ export function getAuthToken(): string {
 export function removeAuthToken() {
   document.cookie = `${COOKIE_NAME}=; path=/; max-age=0`;
 }
+
+export function getAuthPayload(): { staff_id?: string; wallet_address?: string; role?: string } | null {
+  const token = getAuthToken();
+  if (!token) return null;
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch {
+    return null;
+  }
+}

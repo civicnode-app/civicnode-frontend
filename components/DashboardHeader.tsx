@@ -20,7 +20,7 @@ export function DashboardHeader() {
       </div>
 
       {/* Right side */}
-      <UserProfile showBell />
+      <UserProfile />
     </header>
   );
 }
