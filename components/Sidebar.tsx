@@ -1,15 +1,14 @@
 "use client";
-import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { LayoutDashboard, Settings, Cctv } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { label: "DASHBOARD",   href: "/dashboard" },
-  { label: "SYSTEM INFO", href: "/system-config" },
-  { label: "CCTV",        href: "/cctv" },
+  { label: "DASHBOARD",   href: "/dashboard",     icon: LayoutDashboard },
+  { label: "SYSTEM INFO", href: "/system-config", icon: Settings        },
+  { label: "CCTV",        href: "/cctv",           icon: Cctv            },
 ];
 
 export function Sidebar() {
@@ -33,21 +32,20 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-col gap-4">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
+      <nav className="flex flex-col gap-3">
+        {navItems.map(({ label, href, icon: Icon }) => {
+          const isActive = pathname === href;
           return (
-            <Link key={item.href} href={item.href} className="no-underline">
-              <Button
-                variant={isActive ? "active" : "default"}
-                size="menu"
-                className={cn(
-                  "transition-all duration-300",
-                  isActive && "translate-x-2.5",
-                )}
-              >
-                {item.label}
-              </Button>
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                "flex items-center gap-3 w-full px-5 py-3.5 rounded-full font-extrabold text-[15px] text-white no-underline transition-colors duration-200",
+                isActive ? "bg-[#588157]" : "bg-[#a3b18a] hover:bg-[#588157]"
+              )}
+            >
+              <Icon size={18} strokeWidth={2.5} />
+              {label}
             </Link>
           );
         })}
