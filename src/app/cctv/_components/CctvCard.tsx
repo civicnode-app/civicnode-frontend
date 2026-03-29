@@ -34,7 +34,7 @@ export function CctvCard({ node, isAI, streamLoaded, boxes, onToggleAI, onStream
       {/* Stream + bounding boxes */}
       <div className="relative aspect-square bg-[#f0f0f0] rounded-3xl overflow-hidden flex items-center justify-center">
         <StreamImg
-          src={AI_SERVER_URL ? `${AI_SERVER_URL}/stream/${node.id}` : node.stream_url.replace(/\/video$/, "/mjpegfeed")}
+          src={isAI && AI_SERVER_URL ? `${AI_SERVER_URL}/stream/${node.id}` : node.stream_url.replace(/\/video$/, "/mjpegfeed")}
           onLoad={onStreamLoad}
         />
         {!streamLoaded && <span className="text-[40px] opacity-20">📷</span>}
