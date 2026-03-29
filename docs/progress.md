@@ -5,6 +5,7 @@
 ### Yang Sudah Selesai
 
 - ✅ **Fix Hydration Error & Linter di TopBar** — Menunda render komponen `WalletAvatar` dan pembacaan `localStorage`/`cookie` menggunakan state `mounted`. Menggunakan metode `setTimeout` di dalam `useEffect` agar linter React compiler/Biome tidak protes soal _synchronous setState_ yang memicu cascading render.
+- ✅ **Dashboard** — Menyambungkan data hit rate histori ke endpoint asli (`/api/timeline-log`) di file `TimelineLog.tsx`, menggantikan endpoint development statis (`/api/dev/timeline-log`).
 
 ---
 ## Sesi 2026-03-27
@@ -71,7 +72,7 @@
 
 - [ ] **Guard route** — redirect ke `/sign-in` kalau tidak ada token
 - [ ] **System Config page** — review apakah perlu disambungkan ke backend
-- [ ] **Ganti dev endpoints** — setelah AI server nyambung: ganti `/api/dev/stats` dan `/api/dev/timeline-log` ke endpoint real
+- [ ] **Ganti dev endpoints** — setelah AI server nyambung: ganti `/api/dev/stats` ke endpoint real (`/api/dev/timeline-log` sudah selesai dihubungkan)
 
 ---
 

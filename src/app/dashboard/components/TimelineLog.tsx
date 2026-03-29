@@ -30,7 +30,7 @@ export default function TimelineLog() {
 
       setTimelineLoading(true);
       try {
-        const res = await fetch(`${BACKEND_URL}/api/dev/timeline-log`, {
+        const res = await fetch(`${BACKEND_URL}/api/timeline-log`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const json = await res.json();
