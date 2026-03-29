@@ -43,7 +43,6 @@ export default function ZonaPage() {
                 <ZonaCard
                   key={z.id}
                   zona={z}
-                  cameras={[]} // Empty cameras since cctvList is not fetched here. 
                   onEdit={() => zona.openEdit(z)}
                   onDelete={() => zona.handleDelete(z)}
                 />
