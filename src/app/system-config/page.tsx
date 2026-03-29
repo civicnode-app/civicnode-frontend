@@ -74,7 +74,7 @@ export default function SystemConfigPage() {
               <div className="mt-3.5 flex flex-col gap-2.5">
                 {[
                   { label: "App Version", value: "v1.0.0" },
-                  { label: "AI Model", value: "YOLOv8n" },
+                  { label: "AI Model", value: "YOLOv11" },
                   { label: "Environment", value: "Production" },
                   { label: "Last Updated", value: "09 Mar 2026" },
                 ].map((row) => (
