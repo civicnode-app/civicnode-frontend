@@ -6,6 +6,7 @@
 
 - ✅ **Fix Hydration Error & Linter di TopBar** — Menunda render komponen `WalletAvatar` dan pembacaan `localStorage`/`cookie` menggunakan state `mounted`. Menggunakan metode `setTimeout` di dalam `useEffect` agar linter React compiler/Biome tidak protes soal _synchronous setState_ yang memicu cascading render.
 - ✅ **Dashboard** — Menyambungkan data hit rate histori ke endpoint asli (`/api/timeline-log`) di file `TimelineLog.tsx`, menggantikan endpoint development statis (`/api/dev/timeline-log`).
+- ✅ **Perombakan Arsitektur (Headless Data Node)** — Dihapusnya fitur Video Streaming di CctvCard karena AI Server dirubah menjadi *Headless*. Mengganti desain CctvCard murni menjadi Grid 1:1 aspek-rasio *glassmorphism* berbasis *Metric Analytics*, mempersingkat `useCctv.ts` (Membersihkan dummy Array, Interval, Streaming URL state, dll).
 
 ---
 ## Sesi 2026-03-27
