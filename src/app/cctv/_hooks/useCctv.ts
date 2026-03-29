@@ -1,30 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { getAuthToken } from "@/lib/auth";
-import { CCTVNode, BoundingBox, BACKEND_URL } from "../_types";
-
-const DUMMY_LABELS = ["kaleng kosong", "bungkus permen", "botol plastik", "kantong kresek"];
-
-const initBoxes = (): BoundingBox[] =>
-  Array.from({ length: 3 }, (_, i) => ({
-    id: `box-${i}`,
-    x: Math.random() * 55 + 5,
-    y: Math.random() * 55 + 5,
-    w: Math.random() * 12 + 10,
-    h: Math.random() * 12 + 10,
-    label: DUMMY_LABELS[i % DUMMY_LABELS.length],
-    confidence: parseFloat((Math.random() * 0.25 + 0.72).toFixed(2)),
-  }));
-
-const driftBoxes = (prev: BoundingBox[]): BoundingBox[] =>
-  prev.map((b) => ({
-    ...b,
-    x: Math.min(82, Math.max(2, b.x + (Math.random() - 0.5) * 3)),
-    y: Math.min(80, Math.max(2, b.y + (Math.random() - 0.5) * 3)),
-    confidence: parseFloat(
-      Math.min(0.99, Math.max(0.5, b.confidence + (Math.random() - 0.5) * 0.04)).toFixed(2)
-    ),
-  }));
+import { CCTVNode, BACKEND_URL } from "../_types";
 
 type CctvForm = {
   nama: string; zona_id: string; jenis_kamera: string;
@@ -46,10 +23,6 @@ interface Options {
 export function useCctv({ showToast, showAlert, showConfirm, closeDialog }: Options) {
   const [cctvList, setCctvList]         = useState<CCTVNode[]>([]);
   const [cctvLoading, setCctvLoading]   = useState(true);
-  const [aiEnabled, setAiEnabled]       = useState<Record<string, boolean>>({});
-  const [streamLoaded, setStreamLoaded] = useState<Record<string, boolean>>({});
-  const [boxes, setBoxes]               = useState<BoundingBox[]>(initBoxes);
-
   const [modalOpen, setModalOpen]     = useState(false);
   const [editTarget, setEditTarget]   = useState<CCTVNode | null>(null);
   const [form, setForm]               = useState<CctvForm>(emptyForm);
@@ -71,14 +44,6 @@ export function useCctv({ showToast, showAlert, showConfirm, closeDialog }: Opti
   }, []);
 
   useEffect(() => { fetchCctv(); }, [fetchCctv]);
-
-  useEffect(() => {
-    const id = setInterval(() => setBoxes(driftBoxes), 800);
-    return () => clearInterval(id);
-  }, []);
-
-  const toggleAI        = useCallback((id: string) => setAiEnabled((p) => ({ ...p, [id]: !p[id] })), []);
-  const markStreamLoaded = useCallback((id: string) => setStreamLoaded((p) => ({ ...p, [id]: true })), []);
 
   function openAdd() {
     setEditTarget(null);
@@ -161,8 +126,7 @@ export function useCctv({ showToast, showAlert, showConfirm, closeDialog }: Opti
   }
 
   return {
-    cctvList, cctvLoading, aiEnabled, streamLoaded, boxes,
-    toggleAI, markStreamLoaded,
+    cctvList, cctvLoading,
     modalOpen, editTarget, form, setForm, saving, formError,
     openAdd, openEdit, closeModal, handleSubmit, handleDelete,
   };

@@ -92,11 +92,6 @@ export default function CCTVPage() {
                 <CctvCard
                   key={node.id}
                   node={node}
-                  isAI={!!cctv.aiEnabled[node.id]}
-                  streamLoaded={!!cctv.streamLoaded[node.id]}
-                  boxes={cctv.boxes}
-                  onToggleAI={() => cctv.toggleAI(node.id)}
-                  onStreamLoad={() => cctv.markStreamLoaded(node.id)}
                   onEdit={() => cctv.openEdit(node)}
                   onDelete={() => cctv.handleDelete(node)}
                 />
