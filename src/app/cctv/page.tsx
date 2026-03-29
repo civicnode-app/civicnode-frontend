@@ -13,9 +13,9 @@ import { ConfirmDialog } from "./_components/ConfirmDialog";
 export default function CCTVPage() {
   const [activeTab, setActiveTab] = useState<"cctv" | "zona">("cctv");
 
-  const { dialog, toast, showAlert, showConfirm, showToast, closeDialog } = useDialog();
-  const cctv = useCctv({ showToast, showAlert, showConfirm, closeDialog });
-  const zona = useZona({ showToast, showAlert, showConfirm, closeDialog });
+  const { dialog, toast, showConfirm, showToast, closeDialog } = useDialog();
+  const cctv = useCctv({ showToast, showConfirm, closeDialog });
+  const zona = useZona({ showToast, showConfirm, closeDialog });
 
   return (
     <AppLayout>

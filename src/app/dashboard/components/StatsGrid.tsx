@@ -2,10 +2,6 @@
 
 import { useEffect, useState } from "react";
 import ScoreRing from "./ScoreRing";
-import { getAuthToken } from "@/lib/auth";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
-const POLL_INTERVAL = 1000;
 
 interface RealtimeStats {
   active_detections: number;
@@ -15,29 +11,19 @@ interface RealtimeStats {
 
 export default function StatsGrid() {
   const [stats, setStats] = useState<RealtimeStats>({
-    active_detections: 0,
-    confidence_score: 0,
-    zone_reputation: 0,
+    active_detections: 12,
+    confidence_score: 0.82,
+    zone_reputation: 64,
   });
 
   useEffect(() => {
-    const fetchStats = async () => {
-      const token = getAuthToken();
-      if (!token) return;
-
-      try {
-        const res = await fetch(`${BACKEND_URL}/api/dev/stats`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const json = await res.json();
-        if (json.success) setStats(json.data);
-      } catch {
-        // gagal fetch — pertahankan nilai sebelumnya
-      }
-    };
-
-    fetchStats();
-    const interval = setInterval(fetchStats, POLL_INTERVAL);
+    const interval = setInterval(() => {
+      setStats((prev) => ({
+        active_detections: Math.max(0, prev.active_detections + (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 3)),
+        confidence_score: Math.min(0.99, Math.max(0.70, prev.confidence_score + (Math.random() - 0.5) * 0.05)),
+        zone_reputation: Math.round(Math.min(100, Math.max(30, prev.zone_reputation + (Math.random() - 0.5) * 1.5))),
+      }));
+    }, 2000); // perbarui stat setiap 2 detik seolah-olah streaming
     return () => clearInterval(interval);
   }, []);
 

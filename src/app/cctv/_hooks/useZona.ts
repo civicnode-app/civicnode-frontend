@@ -1,20 +1,25 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
-import { Zona, BACKEND_URL } from "../_types";
-import { getAuthToken } from "@/lib/auth";
+import { useState } from "react";
+import { Zona } from "../_types";
 
 type ZonaForm = { nama: string; deskripsi: string };
 
+const INITIAL_ZONAS: Zona[] = [
+  { id: "z1", nama: "Simpang Antasari", deskripsi: "Area persimpangan lalu-lintas utama yang berpotensi rawan tumpukan sampah", zone_reputation: 42 },
+  { id: "z2", nama: "Pasar Sudimampur", deskripsi: "Pusat perbelanjaan grosir tradisional dengan volume limbah domestik tinggi.", zone_reputation: 28 },
+  { id: "z3", nama: "Taman Kamboja", deskripsi: "Taman terbuka rekreasi hijau yang dilengkapi banyak tempat sampah terpisah.", zone_reputation: 85 },
+  { id: "z4", nama: "Jalan Veteran", deskripsi: "Jalur utama kuliner dan pejalan kaki lintas kecamatan.", zone_reputation: 62 },
+];
+
 interface Options {
   showToast: (msg: string) => void;
-  showAlert: (msg: string) => void;
   showConfirm: (msg: string, onConfirm: () => void) => void;
   closeDialog: () => void;
 }
 
-export function useZona({ showToast, showAlert, showConfirm, closeDialog }: Options) {
-  const [zonaList, setZonaList]   = useState<Zona[]>([]);
-  const [zonaLoading, setZonaLoading] = useState(true);
+export function useZona({ showToast, showConfirm, closeDialog }: Options) {
+  const [zonaList, setZonaList]   = useState<Zona[]>(INITIAL_ZONAS);
+  const zonaLoading               = false; // Disable loading for presentation
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const [modalOpen, setModalOpen]   = useState(false);
@@ -22,20 +27,6 @@ export function useZona({ showToast, showAlert, showConfirm, closeDialog }: Opti
   const [form, setForm]             = useState<ZonaForm>({ nama: "", deskripsi: "" });
   const [saving, setSaving]         = useState(false);
   const [formError, setFormError]   = useState("");
-
-  const token = () => getAuthToken();
-
-  const fetchZona = useCallback(async () => {
-    setZonaLoading(true);
-    try {
-      const res  = await fetch(`${BACKEND_URL}/api/zona`, { headers: { Authorization: `Bearer ${token()}` } });
-      const json = await res.json();
-      if (json.success) setZonaList(json.data);
-    } catch { /* pertahankan list kosong */ }
-    finally { setZonaLoading(false); }
-  }, []);
-
-  useEffect(() => { fetchZona(); }, [fetchZona]);
 
   const sortedZona = [...zonaList].sort((a, b) =>
     sortOrder === "asc"
@@ -66,42 +57,39 @@ export function useZona({ showToast, showAlert, showConfirm, closeDialog }: Opti
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     if (!form.nama.trim()) { setFormError("Nama zona wajib diisi."); return; }
+    
     setSaving(true);
     setFormError("");
-    try {
-      const url    = editTarget ? `${BACKEND_URL}/api/zona/${editTarget.id}` : `${BACKEND_URL}/api/zona`;
-      const method = editTarget ? "PATCH" : "POST";
-      const res    = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
-        body: JSON.stringify(form),
-      });
-      const json = await res.json();
-      if (!json.success) { setFormError(json.message ?? "Gagal menyimpan."); return; }
-      closeModal();
-      fetchZona();
-      showToast(editTarget ? "Zona berhasil diperbarui." : "Zona berhasil ditambahkan.");
-    } catch {
-      setFormError("Tidak bisa terhubung ke server.");
-    } finally {
+
+    // Simulate network delay
+    setTimeout(() => {
+      if (editTarget) {
+        setZonaList(prev => prev.map(z => z.id === editTarget.id ? {
+          ...z,
+          nama: form.nama,
+          deskripsi: form.deskripsi,
+        } : z));
+        showToast("Zona berhasil diperbarui.");
+      } else {
+        const newZona: Zona = {
+          id: `new-${Date.now()}`,
+          nama: form.nama,
+          deskripsi: form.deskripsi,
+          zone_reputation: 50, // Default reputasi
+        };
+        setZonaList(prev => [...prev, newZona]);
+        showToast("Zona berhasil ditambahkan.");
+      }
       setSaving(false);
-    }
+      closeModal();
+    }, 500);
   }
 
   function handleDelete(zona: Zona) {
-    showConfirm(`Hapus zona "${zona.nama}"?`, async () => {
+    showConfirm(`Hapus zona "${zona.nama}"?`, () => {
       closeDialog();
-      try {
-        const res  = await fetch(`${BACKEND_URL}/api/zona/${zona.id}`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token()}` },
-        });
-        const json = await res.json();
-        if (json.success) { fetchZona(); showToast("Zona berhasil dihapus."); }
-        else showAlert(json.message ?? "Gagal menghapus.");
-      } catch {
-        showAlert("Tidak bisa terhubung ke server.");
-      }
+      setZonaList(prev => prev.filter(z => z.id !== zona.id));
+      showToast("Zona berhasil dihapus.");
     });
   }
 

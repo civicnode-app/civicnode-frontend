@@ -1,7 +1,6 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
-import { getAuthToken } from "@/lib/auth";
-import { CCTVNode, BACKEND_URL } from "../_types";
+import { useState } from "react";
+import { CCTVNode } from "../_types";
 
 type CctvForm = {
   nama: string; zona_id: string; jenis_kamera: string;
@@ -13,37 +12,36 @@ const emptyForm: CctvForm = {
   stream_url: "", ip_address: "", latitude: "", longitude: "",
 };
 
+const DUMMY_ZONAS = [
+  { id: "z1", nama: "Simpang Antasari" },
+  { id: "z2", nama: "Pasar Sudimampur" },
+  { id: "z3", nama: "Taman Kamboja" },
+  { id: "z4", nama: "Jalan Veteran" },
+];
+
+const INITIAL_CCTVS: CCTVNode[] = [
+  { id: "c1", nama: "CCTV - Simpang Antasari 01", ip_address: "192.168.1.10", stream_url: "rtsp://simpang-antasari.local/stream1", status: true, active_detections: 4, confidence_score: 0.85, jenis_kamera: "cctv", created_at: new Date().toISOString(), zona: DUMMY_ZONAS[0] },
+  { id: "c2", nama: "CCTV - Simpang Antasari 02", ip_address: "192.168.1.11", stream_url: "rtsp://simpang-antasari.local/stream2", status: true, active_detections: 1, confidence_score: 0.90, jenis_kamera: "cctv", created_at: new Date().toISOString(), zona: DUMMY_ZONAS[0] },
+  { id: "c3", nama: "CCTV - Pasar Sudimampur Timur", ip_address: "192.168.1.12", stream_url: "rtsp://sudimampur.local/stream1", status: false, active_detections: 0, confidence_score: 0, jenis_kamera: "cctv", created_at: new Date().toISOString(), zona: DUMMY_ZONAS[1] },
+  { id: "c4", nama: "Node 04 - Taman Kamboja", ip_address: "192.168.1.13", stream_url: "rtsp://taman-kamboja.local/cam", status: true, active_detections: 2, confidence_score: 0.76, jenis_kamera: "cctv", created_at: new Date().toISOString(), zona: DUMMY_ZONAS[2] },
+  { id: "c5", nama: "CCTV - Jalan Veteran 01", ip_address: "192.168.1.14", stream_url: "rtsp://veteran.local/stream", status: true, active_detections: 5, confidence_score: 0.92, jenis_kamera: "cctv", created_at: new Date().toISOString(), zona: DUMMY_ZONAS[3] },
+  { id: "c6", nama: "CCTV - Taman Kamboja Node 2", ip_address: "192.168.1.15", stream_url: "rtsp://taman-kamboja.local/cam2", status: true, active_detections: 0, confidence_score: 0, jenis_kamera: "cctv", created_at: new Date().toISOString(), zona: DUMMY_ZONAS[2] },
+];
+
 interface Options {
   showToast: (msg: string) => void;
-  showAlert: (msg: string) => void;
   showConfirm: (msg: string, onConfirm: () => void) => void;
   closeDialog: () => void;
 }
 
-export function useCctv({ showToast, showAlert, showConfirm, closeDialog }: Options) {
-  const [cctvList, setCctvList]         = useState<CCTVNode[]>([]);
-  const [cctvLoading, setCctvLoading]   = useState(true);
+export function useCctv({ showToast, showConfirm, closeDialog }: Options) {
+  const [cctvList, setCctvList]         = useState<CCTVNode[]>(INITIAL_CCTVS);
+  const cctvLoading                     = false; // Disable loading spinner for presentation
   const [modalOpen, setModalOpen]     = useState(false);
   const [editTarget, setEditTarget]   = useState<CCTVNode | null>(null);
   const [form, setForm]               = useState<CctvForm>(emptyForm);
   const [saving, setSaving]           = useState(false);
   const [formError, setFormError]     = useState("");
-
-  const token = () => getAuthToken();
-
-  const fetchCctv = useCallback(async () => {
-    setCctvLoading(true);
-    const t = token();
-    if (!t) { setCctvLoading(false); return; }
-    try {
-      const res  = await fetch(`${BACKEND_URL}/api/cctv`, { headers: { Authorization: `Bearer ${t}` } });
-      const json = await res.json();
-      if (json.success) setCctvList(json.data);
-    } catch { /* pertahankan list kosong */ }
-    finally { setCctvLoading(false); }
-  }, []);
-
-  useEffect(() => { fetchCctv(); }, [fetchCctv]);
 
   function openAdd() {
     setEditTarget(null);
@@ -79,49 +77,54 @@ export function useCctv({ showToast, showAlert, showConfirm, closeDialog }: Opti
     if (!form.zona_id)           { setFormError("Zona wajib dipilih.");       return; }
     if (!form.stream_url.trim()) { setFormError("Stream URL wajib diisi.");   return; }
     if (!form.ip_address.trim()) { setFormError("IP Address wajib diisi.");   return; }
+    
     setSaving(true);
     setFormError("");
-    try {
-      const body: Record<string, unknown> = {
-        nama: form.nama, zona_id: form.zona_id, jenis_kamera: form.jenis_kamera,
-        stream_url: form.stream_url, ip_address: form.ip_address,
-      };
-      if (form.latitude)  body.latitude  = parseFloat(form.latitude);
-      if (form.longitude) body.longitude = parseFloat(form.longitude);
 
-      const url    = editTarget ? `${BACKEND_URL}/api/cctv/${editTarget.id}` : `${BACKEND_URL}/api/cctv`;
-      const method = editTarget ? "PATCH" : "POST";
-      const res    = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
-        body: JSON.stringify(body),
-      });
-      const json = await res.json();
-      if (!json.success) { setFormError(json.message ?? "Gagal menyimpan."); return; }
-      closeModal();
-      fetchCctv();
-      showToast(editTarget ? "Kamera berhasil diperbarui." : "Kamera berhasil ditambahkan.");
-    } catch {
-      setFormError("Tidak bisa terhubung ke server.");
-    } finally {
+    // Simulate network delay
+    setTimeout(() => {
+      const zonaObj = DUMMY_ZONAS.find(z => z.id === form.zona_id) || { id: form.zona_id, nama: "Ext Zona" };
+      
+      if (editTarget) {
+        setCctvList(prev => prev.map(c => c.id === editTarget.id ? {
+          ...c,
+          nama: form.nama,
+          zona: zonaObj,
+          jenis_kamera: form.jenis_kamera,
+          stream_url: form.stream_url,
+          ip_address: form.ip_address,
+          latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+          longitude: form.longitude ? parseFloat(form.longitude) : undefined,
+        } : c));
+        showToast("Kamera berhasil diperbarui.");
+      } else {
+        const newNode: CCTVNode = {
+          id: `new-${Date.now()}`,
+          nama: form.nama,
+          ip_address: form.ip_address,
+          stream_url: form.stream_url,
+          status: true,
+          active_detections: 0,
+          confidence_score: 0,
+          jenis_kamera: form.jenis_kamera,
+          created_at: new Date().toISOString(),
+          zona: zonaObj,
+          latitude: form.latitude ? parseFloat(form.latitude) : undefined,
+          longitude: form.longitude ? parseFloat(form.longitude) : undefined,
+        };
+        setCctvList(prev => [...prev, newNode]);
+        showToast("Kamera berhasil ditambahkan.");
+      }
       setSaving(false);
-    }
+      closeModal();
+    }, 600);
   }
 
   function handleDelete(node: CCTVNode) {
-    showConfirm(`Hapus kamera "${node.nama}"?`, async () => {
+    showConfirm(`Hapus kamera "${node.nama}"?`, () => {
       closeDialog();
-      try {
-        const res  = await fetch(`${BACKEND_URL}/api/cctv/${node.id}`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token()}` },
-        });
-        const json = await res.json();
-        if (json.success) { fetchCctv(); showToast("Kamera berhasil dihapus."); }
-        else showAlert(json.message ?? "Gagal menghapus.");
-      } catch {
-        showAlert("Tidak bisa terhubung ke server.");
-      }
+      setCctvList(prev => prev.filter(c => c.id !== node.id));
+      showToast("Kamera berhasil dihapus.");
     });
   }
 
