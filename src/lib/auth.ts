@@ -2,10 +2,12 @@ const COOKIE_NAME = "access_token";
 const MAX_AGE     = 60 * 60 * 24; // 24 jam
 
 export function setAuthToken(token: string) {
+  if (typeof document === "undefined") return;
   document.cookie = `${COOKIE_NAME}=${token}; path=/; max-age=${MAX_AGE}; SameSite=Strict`;
 }
 
 export function getAuthToken(): string {
+  if (typeof document === "undefined") return "";
   return (
     document.cookie
       .split("; ")
@@ -15,6 +17,7 @@ export function getAuthToken(): string {
 }
 
 export function removeAuthToken() {
+  if (typeof document === "undefined") return;
   document.cookie = `${COOKIE_NAME}=; path=/; max-age=0`;
 }
 
