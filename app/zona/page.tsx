@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { Sidebar } from "@/components/Sidebar";
+import { AppLayout } from "@/components/AppLayout";
 import { getAuthToken } from "@/lib/auth";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
@@ -116,10 +116,8 @@ export default function ZonaPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full">
-      <Sidebar />
-
-      <main className="flex-1 bg-[#588157] p-8 flex flex-col gap-6">
+    <AppLayout>
+      <main className="flex-1 bg-[#588157] p-8 flex flex-col gap-6 overflow-y-auto">
         {/* Header */}
         <header className="flex justify-between items-center">
           <span className="text-white font-extrabold text-xl tracking-[0.05em]">
@@ -196,6 +194,7 @@ export default function ZonaPage() {
       </main>
 
       {/* Modal tambah / edit */}
+
       {modalOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center"
@@ -260,6 +259,6 @@ export default function ZonaPage() {
           </div>
         </div>
       )}
-    </div>
+    </AppLayout>
   );
 }

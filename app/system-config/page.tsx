@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Sidebar } from "@/components/Sidebar";
+import { AppLayout } from "@/components/AppLayout";
 import { WalletAvatar } from "@/components/WalletAvatar";
 import { getAuthToken } from "@/lib/auth";
 
@@ -35,30 +35,10 @@ export default function SystemConfigPage() {
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full">
-      <Sidebar />
-
-      <main className="flex-1 bg-[#588157] p-8 flex flex-col gap-6">
-        {/* Header */}
-        <header className="flex justify-end items-center gap-4">
-          <div className="bg-[#a3b18a] py-1.5 px-5 rounded-full flex items-center gap-3 text-white">
-            {profile?.wallet_address
-              ? <WalletAvatar address={profile.wallet_address} size={38} className="border-2 border-[#333]" />
-              : <div className="w-9.5 h-9.5 bg-[#eee] rounded-full border-2 border-[#333] shrink-0" />
-            }
-            <div className="leading-[1.3]">
-              <p className="font-extrabold m-0 text-sm">
-                {profile?.full_name ?? "—"}
-              </p>
-              <p className="text-[10px] m-0 opacity-80 uppercase">
-                {profile?.role ?? "—"}
-              </p>
-            </div>
-          </div>
-        </header>
-
+    <AppLayout>
+      <main className="flex-1 bg-[#588157] p-8 overflow-y-auto">
         {/* Config Grid */}
-        <div className="bg-[#CADBB7] rounded-[45px] p-9 flex-1 grid grid-cols-3 gap-5">
+        <div className="bg-[#CADBB7] rounded-[45px] p-9 h-full grid grid-cols-3 gap-5">
           {/* ── KOLOM 1: Profil ── */}
           <div className="flex flex-col gap-4">
             <div className="bg-white rounded-[28px] p-6 shadow-[0_4px_14px_rgba(0,0,0,0.06)] transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] hover:scale-[1.02] hover:shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
@@ -132,6 +112,6 @@ export default function SystemConfigPage() {
           </div>
         </div>
       </main>
-    </div>
+    </AppLayout>
   );
 }

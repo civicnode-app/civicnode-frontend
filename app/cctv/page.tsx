@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Sidebar } from "@/components/Sidebar";
+import { AppLayout } from "@/components/AppLayout";
 import { useDialog } from "./_hooks/useDialog";
 import { useCctv }   from "./_hooks/useCctv";
 import { useZona }   from "./_hooks/useZona";
@@ -18,10 +18,8 @@ export default function CCTVPage() {
   const zona = useZona({ showToast, showAlert, showConfirm, closeDialog });
 
   return (
-    <div className="flex min-h-screen w-full">
-      <Sidebar />
-
-      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#588157]">
+    <AppLayout>
+      <main className="flex-1 flex flex-col overflow-hidden bg-[#588157]">
 
         {/* ── Sticky top bar ── */}
         <div className="px-8 pt-8 flex flex-col gap-5">
@@ -58,13 +56,6 @@ export default function CCTVPage() {
                 </div>
               )}
 
-              <div className="bg-[#a3b18a] py-1.5 px-5 rounded-full flex items-center gap-3 text-white shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
-                <div className="w-10 h-10 bg-[#eee] rounded-full border-2 border-[#333] shrink-0" />
-                <div className="leading-[1.2]">
-                  <p className="font-extrabold m-0 text-[15px]">ATUN</p>
-                  <p className="text-[10px] m-0 opacity-80">OWNER</p>
-                </div>
-              </div>
             </div>
           </header>
 
@@ -169,6 +160,6 @@ export default function CCTVPage() {
         onChange={(patch) => zona.setForm((p) => ({ ...p, ...patch }))}
         onSubmit={zona.handleSubmit}
       />
-    </div>
+    </AppLayout>
   );
 }
