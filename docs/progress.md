@@ -1,5 +1,12 @@
 # Progress Log
 
+## Sesi 2026-03-29
+
+### Yang Sudah Selesai
+
+- ✅ **Fix Hydration Error & Linter di TopBar** — Menunda render komponen `WalletAvatar` dan pembacaan `localStorage`/`cookie` menggunakan state `mounted`. Menggunakan metode `setTimeout` di dalam `useEffect` agar linter React compiler/Biome tidak protes soal _synchronous setState_ yang memicu cascading render.
+
+---
 ## Sesi 2026-03-27
 
 ### Yang Sudah Selesai
