@@ -64,7 +64,7 @@ export default function ZoneTriageList() {
         <div>
           <h2 className="text-white font-extrabold text-2xl tracking-tight">Zone Triage System</h2>
           <p className="text-white/80 font-medium text-sm mt-1">
-            Memprioritaskan pengiriman petugas kebun ke zona kritis.
+            Memprioritaskan pengiriman petugas kebersihan ke zona kritis.
           </p>
         </div>
         <div className="bg-white/10 p-2 px-4 rounded-full flex items-center gap-2">
