@@ -24,7 +24,8 @@ export async function POST(request: Request) {
     }
 
     // Verifikasi tanda tangan MetaMask
-    const recovered = ethers.verifyMessage(nonce, signature);
+    // Nonce ber-prefix 0x → perlakukan sebagai raw bytes (sesuai cara MetaMask encode saat personal_sign)
+    const recovered = ethers.verifyMessage(ethers.getBytes(nonce), signature);
     if (recovered.toLowerCase() !== wallet_address.toLowerCase()) {
       return NextResponse.json(
         { error: "Tanda tangan tidak valid" },

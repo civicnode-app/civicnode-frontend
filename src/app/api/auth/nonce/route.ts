@@ -10,7 +10,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "address wajib diisi" }, { status: 400 });
   }
 
-  const nonce = randomBytes(32).toString("hex");
+  // 0x-prefixed supaya MetaMask decode ke raw bytes saat personal_sign
+  const nonce = "0x" + randomBytes(32).toString("hex");
   // Nonce berlaku 5 menit
   nonceStore.set(address, { nonce, expires: Date.now() + 5 * 60 * 1000 });
 

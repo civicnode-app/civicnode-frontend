@@ -1,5 +1,23 @@
 # Progress Log
 
+## Sesi 2026-03-30 (lanjutan 4)
+
+### Yang Sudah Selesai
+
+#### Auth — Fix Login MetaMask & Fitur Tambahan
+
+- ✅ **Fix "Tanda tangan tidak valid"** — `ethers.verifyMessage(nonce, sig)` → `ethers.verifyMessage(ethers.getBytes(nonce), sig)` agar nonce `0x`-prefixed diperlakukan sebagai raw bytes, sesuai cara MetaMask encode saat `personal_sign`
+- ✅ **Fix "Nonce tidak valid atau sudah kedaluwarsa"** — `nonceStore` dipindah ke `global._nonceStore` agar tidak ter-reset saat HMR (Next.js hot reload) re-evaluate modul
+- ✅ **Popup konfirmasi logout** — Dialog modal dengan backdrop blur, animasi `fadeUp`, tombol Batal & Keluar; klik di luar dialog = batal
+- ✅ **Netlify deployment config** — `netlify.toml` + `@netlify/plugin-nextjs`; env vars yang wajib diset: `JWT_SECRET`, `NEXT_PUBLIC_AI_SERVER_URL` (opsional)
+
+#### Catatan Deployment Netlify
+
+- `netlify.toml` ada di root `civicnode-frontend/` (bukan root monorepo)
+- `nonceStore` masih in-memory — di serverless Netlify ada kemungkinan tipis nonce hilang jika dua request kena container berbeda (acceptable untuk demo)
+
+---
+
 ## Sesi 2026-03-30 (lanjutan 3)
 
 ### Yang Sudah Selesai

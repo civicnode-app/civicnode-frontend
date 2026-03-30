@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+  # Salin variabel ini ke Environment Variables di dashboard Netlify:
+  #   JWT_SECRET          → secret untuk sign/verify JWT auth token
+  #   NEXT_PUBLIC_AI_SERVER_URL → (opsional) URL AI server jika dipakai
