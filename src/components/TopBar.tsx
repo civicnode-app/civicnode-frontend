@@ -2,13 +2,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, LogOut } from "lucide-react";
 import { WalletAvatar } from "@/components/WalletAvatar";
 import { useAppStore } from "@/stores/appStore";
-import { getAuthPayload } from "@/lib/auth";
+import { getAuthPayload, removeAuthToken } from "@/lib/auth";
 
 export function TopBar() {
   const { user } = useAppStore();
+  const router = useRouter();
   const payload = getAuthPayload();
   const walletAddress = payload?.wallet_address ?? "";
 
@@ -17,6 +19,11 @@ export function TopBar() {
     const timer = setTimeout(() => setMounted(true), 0);
     return () => clearTimeout(timer);
   }, []);
+
+  function handleLogout() {
+    removeAuthToken();
+    router.push("/sign-in");
+  }
 
   return (
     <header className="w-full bg-[#DAD7CD] border-b-2 border-[#588157] px-6 py-3 flex items-center gap-4 shrink-0">
@@ -45,16 +52,25 @@ export function TopBar() {
         />
       </div>
 
-      {/* Profile */}
-      <div className="ml-auto flex items-center gap-3 bg-[#a3b18a] py-1.5 px-4 rounded-full text-white">
-        {mounted && walletAddress
-          ? <WalletAvatar address={walletAddress} size={34} className="border-2 border-[#333]" />
-          : <div className="w-9 h-9 bg-[#eee] rounded-full border-2 border-[#333] shrink-0" />
-        }
-        <div className="leading-tight">
-          <p className="m-0 font-extrabold text-[13px]">{mounted ? user.name : "..."}</p>
-          <p className="m-0 text-[10px] opacity-80 uppercase">{mounted ? user.role : "..."}</p>
+      {/* Profile + Logout */}
+      <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-3 bg-[#a3b18a] py-1.5 px-4 rounded-full text-white">
+          {mounted && walletAddress
+            ? <WalletAvatar address={walletAddress} size={34} className="border-2 border-[#333]" />
+            : <div className="w-9 h-9 bg-[#eee] rounded-full border-2 border-[#333] shrink-0" />
+          }
+          <div className="leading-tight">
+            <p className="m-0 font-extrabold text-[13px]">{mounted ? user.name : "..."}</p>
+            <p className="m-0 text-[10px] opacity-80 uppercase">{mounted ? user.role : "..."}</p>
+          </div>
         </div>
+        <button
+          onClick={handleLogout}
+          title="Logout"
+          className="p-2.5 rounded-full bg-white/60 hover:bg-red-50 text-[#888] hover:text-red-500 transition-colors duration-200 cursor-pointer border-none"
+        >
+          <LogOut size={16} strokeWidth={2.5} />
+        </button>
       </div>
     </header>
   );
