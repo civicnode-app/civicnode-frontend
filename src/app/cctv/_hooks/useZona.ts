@@ -5,10 +5,12 @@ import { Zona } from "../_types";
 type ZonaForm = { nama: string; deskripsi: string };
 
 const INITIAL_ZONAS: Zona[] = [
-  { id: "z1", nama: "Simpang Antasari", deskripsi: "Area persimpangan lalu-lintas utama yang berpotensi rawan tumpukan sampah", zone_reputation: 42 },
+  { id: "z1", nama: "Simpang Antasari", deskripsi: "Area persimpangan lalu-lintas utama yang berpotensi rawan tumpukan sampah.", zone_reputation: 42 },
   { id: "z2", nama: "Pasar Sudimampur", deskripsi: "Pusat perbelanjaan grosir tradisional dengan volume limbah domestik tinggi.", zone_reputation: 28 },
-  { id: "z3", nama: "Taman Kamboja", deskripsi: "Taman terbuka rekreasi hijau yang dilengkapi banyak tempat sampah terpisah.", zone_reputation: 85 },
-  { id: "z4", nama: "Jalan Veteran", deskripsi: "Jalur utama kuliner dan pejalan kaki lintas kecamatan.", zone_reputation: 62 },
+  { id: "z3", nama: "Taman Kamboja",    deskripsi: "Taman terbuka rekreasi hijau yang dilengkapi banyak tempat sampah terpisah.", zone_reputation: 85 },
+  { id: "z4", nama: "Jalan Veteran",    deskripsi: "Jalur utama kuliner dan pejalan kaki lintas kecamatan.", zone_reputation: 62 },
+  { id: "z5", nama: "Lorong Pahlawan",  deskripsi: "Belum ada kamera CCTV yang terpasang. Tingkat kebersihan tidak dapat dipantau.", zone_reputation: 0 },
+  { id: "z6", nama: "Terminal Lama",    deskripsi: "Belum ada kamera CCTV yang terpasang. Tingkat kebersihan tidak dapat dipantau.", zone_reputation: 0 },
 ];
 
 interface Options {

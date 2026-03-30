@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { label: "DASHBOARD",   href: "/dashboard",     icon: LayoutDashboard },
   { label: "SYSTEM INFO", href: "/system-config", icon: Settings        },
-  { label: "CCTV",        href: "/cctv",           icon: Cctv            },
+  { label: "CCTV & ZONA", href: "/cctv",           icon: Cctv            },
 ];
 
 export function Sidebar() {

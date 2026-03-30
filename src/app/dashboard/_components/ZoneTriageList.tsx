@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { AlertTriangle, MapPin, Search, ChevronRight, CheckCircle2, Video, Wifi, WifiOff, Users, CameraOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { AlertTriangle, MapPin, Search, ChevronRight, CheckCircle2, Video, Wifi, WifiOff, Users, CameraOff, Cctv } from "lucide-react";
 import { DispatchModal } from "./DispatchModal";
 import { useZoneTriage } from "../_hooks/useZoneTriage";
 import { getAccentColor } from "../_types";
@@ -17,6 +19,7 @@ export default function ZoneTriageList() {
     closeDispatch,
     handleDispatchConfirm,
   } = useZoneTriage();
+  const router = useRouter();
 
   return (
     <div className="flex flex-col gap-5 w-full">
@@ -44,8 +47,10 @@ export default function ZoneTriageList() {
           const dispatched    = zoneDispatches[zone.id] ?? 0;
 
           return (
-            <div
+            <motion.div
               key={zone.id}
+              layout
+              transition={{ layout: { type: "spring", stiffness: 300, damping: 30 } }}
               className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/50 overflow-hidden transition-shadow hover:shadow-[0_12px_40px_rgb(0,0,0,0.18)] flex flex-col"
             >
               {/* Accent top bar */}
@@ -152,7 +157,7 @@ export default function ZoneTriageList() {
                       </button>
                     )}
                     <button
-                      onClick={() => openDispatch(zone)}
+                      onClick={() => isUnmonitored ? router.push("/cctv") : openDispatch(zone)}
                       className="flex-[1.5] py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition-colors border-2 cursor-pointer text-white"
                       style={{
                         backgroundColor: isUnmonitored ? "#588157" : accentColor,
@@ -160,8 +165,11 @@ export default function ZoneTriageList() {
                         boxShadow: isCritical ? `0 4px 14px ${accentColor}40` : "none",
                       }}
                     >
-                      {isUnmonitored ? "Kirim Inspeksi" : "Kirim Petugas"}
-                      <ChevronRight className="w-3.5 h-3.5" />
+                      {isUnmonitored ? (
+                        <><Cctv className="w-3.5 h-3.5" />Pasang CCTV</>
+                      ) : (
+                        <>Kirim Petugas<ChevronRight className="w-3.5 h-3.5" /></>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -208,7 +216,7 @@ export default function ZoneTriageList() {
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

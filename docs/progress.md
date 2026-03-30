@@ -1,5 +1,19 @@
 # Progress Log
 
+## Sesi 2026-03-30 (lanjutan)
+
+### Yang Sudah Selesai
+
+#### Dashboard — Penyempurnaan UI & Animasi
+
+- ✅ **Tombol "Pasang CCTV"** — tombol "Kirim Inspeksi" di card zona tidak terpantau diganti jadi "Pasang CCTV" (icon `Cctv`), klik langsung navigasi ke halaman `/cctv`
+- ✅ **Animasi reorder zona** — card zona tidak lagi blink saat urutan berubah akibat sorting kebersihan; menggunakan `motion.div layout` dari `framer-motion` (spring 300/30) sehingga card slide smooth ke posisi barunya
+- ✅ **Sync data dummy Dashboard ↔ CCTV** — nama kamera, zona, dan ID disinkronkan antara `dashboard/_types.ts` dan `cctv/_hooks/useCctv.ts` + `useZona.ts`; zona z5/z6 (Lorong Pahlawan, Terminal Lama) kini muncul di halaman CCTV pada tab Zona (tanpa kamera terhubung) dan di dropdown tambah kamera
+- ✅ **Sidebar rename** — label "CCTV" diganti "CCTV & ZONA" supaya user tahu halaman itu mengurus keduanya
+- ✅ **`framer-motion` di-commit** — package sudah masuk `package.json` & `package-lock.json`
+
+---
+
 ## Sesi 2026-03-30
 
 ### Yang Sudah Selesai
