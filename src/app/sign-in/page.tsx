@@ -68,9 +68,10 @@ export default function SignIn() {
         },
         body: JSON.stringify({ wallet_address, signature, nonce }),
       });
-      // Jika server tidak ok, lempar error
-      // kemungkinan karena signature tidak valid atau nonce sudah dipakai atau karena user belum terdaftar di Supabase
-      if (!res.ok) throw new Error("Gagal autentikasi dengan MetaMask.");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Gagal autentikasi dengan MetaMask.");
+      }
       // Jika ok, ambil access token dari response dan simpan di localStorage
       const {
         data: { access_token },
