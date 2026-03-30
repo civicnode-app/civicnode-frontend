@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
+import { DispatchModal } from "./DispatchModal";
 import {
   AlertTriangle,
   MapPin,
@@ -131,12 +132,18 @@ const DUMMY_CAMERAS: CameraNode[] = [
 
 export default function ZoneTriageList() {
   const [zones] = useState<TriageZone[]>(DUMMY_ZONES);
+  const [dispatchTarget, setDispatchTarget] = useState<TriageZone | null>(null);
 
   // Sorting: Zona paling kritis (skor terendah) tampil di atas
   const sortedZones = useMemo(
     () => [...zones].sort((a, b) => a.score - b.score),
     [zones],
   );
+
+  function handleDispatchConfirm(zone: TriageZone, jumlah: number) {
+    // Placeholder: nanti disambungkan ke API dispatching
+    console.log(`Mengirim ${jumlah} petugas ke ${zone.name}`);
+  }
 
   return (
     <div className="flex flex-col gap-5 w-full">
@@ -265,6 +272,7 @@ export default function ZoneTriageList() {
                       Bukti
                     </button>
                     <button
+                      onClick={() => setDispatchTarget(zone)}
                       className="flex-[1.5] py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1 transition-colors border-2 cursor-pointer text-white"
                       style={{
                         backgroundColor: accentColor,
@@ -334,6 +342,13 @@ export default function ZoneTriageList() {
           );
         })}
       </div>
+
+      {/* Dispatch Modal */}
+      <DispatchModal
+        target={dispatchTarget}
+        onClose={() => setDispatchTarget(null)}
+        onConfirm={handleDispatchConfirm}
+      />
     </div>
   );
 }
