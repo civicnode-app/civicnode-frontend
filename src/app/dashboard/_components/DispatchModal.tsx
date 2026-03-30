@@ -2,41 +2,33 @@
 
 import { useState, useRef } from "react";
 import { X, Minus, Plus, Truck, MapPin, AlertTriangle } from "lucide-react";
+import { TriageZone, getAccentColor } from "../_types";
 
 const MAX_PERSONEL = 30;
 const MIN_PERSONEL = 1;
 
-export interface DispatchTarget {
-  id: string;
-  name: string;
-  location: string;
-  score: number;
-  evidence_url: string;
-  last_updated: string;
-}
-
 interface DispatchModalProps {
-  target: DispatchTarget | null;
+  target: TriageZone | null;
   onClose: () => void;
-  onConfirm: (zone: DispatchTarget, jumlah: number) => void;
+  onConfirm: (zone: TriageZone, jumlah: number) => void;
 }
 
-// Komponen inner yang hanya di-render ketika target ada
-// Sehingga setiap kali target berganti, state jumlah di-reset otomatis via key
+// Inner component — di-mount ulang via key setiap zona berganti,
+// sehingga state jumlah otomatis reset ke 3 tanpa useEffect.
 function ModalContent({
   target,
   onClose,
   onConfirm,
 }: {
-  target: DispatchTarget;
+  target: TriageZone;
   onClose: () => void;
-  onConfirm: (zone: DispatchTarget, jumlah: number) => void;
+  onConfirm: (zone: TriageZone, jumlah: number) => void;
 }) {
   const [jumlah, setJumlah] = useState(3);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isCritical  = target.score < 50;
-  const accentColor = isCritical ? "#ef4444" : target.score < 80 ? "#f59e0b" : "#22c55e";
+  const accentColor = getAccentColor(target.score);
 
   function clamp(val: number) {
     return Math.max(MIN_PERSONEL, Math.min(MAX_PERSONEL, val));
@@ -99,7 +91,6 @@ function ModalContent({
         <div className="flex items-center justify-between gap-4">
           <span className="text-[11px] font-extrabold text-slate-400 tracking-wider">JUMLAH PERSONEL</span>
           <div className="flex items-center gap-3">
-            {/* Tombol minus */}
             <button
               onClick={() => setJumlah(clamp(jumlah - 1))}
               disabled={jumlah <= MIN_PERSONEL}
@@ -108,7 +99,6 @@ function ModalContent({
               <Minus className="w-4 h-4" />
             </button>
 
-            {/* Input angka manual */}
             <input
               ref={inputRef}
               type="number"
@@ -119,7 +109,6 @@ function ModalContent({
               className="w-16 text-center text-2xl font-black text-slate-800 border-2 border-slate-200 rounded-xl py-1.5 focus:outline-none focus:border-[#588157] transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
 
-            {/* Tombol plus */}
             <button
               onClick={() => setJumlah(clamp(jumlah + 1))}
               disabled={jumlah >= MAX_PERSONEL}
@@ -133,12 +122,10 @@ function ModalContent({
         {/* Slider */}
         <div className="flex flex-col gap-2">
           <div className="relative h-3 bg-slate-100 rounded-full overflow-hidden">
-            {/* Fill track */}
             <div
               className="absolute left-0 top-0 h-full rounded-full transition-all duration-100"
               style={{ width: `${sliderPercent}%`, backgroundColor: accentColor }}
             />
-            {/* Range input transparan di atas */}
             <input
               type="range"
               min={MIN_PERSONEL}
@@ -180,7 +167,7 @@ function ModalContent({
   );
 }
 
-// Wrapper yang menangani backdrop dan null-guard
+// Wrapper — menangani backdrop dan null-guard
 export function DispatchModal({ target, onClose, onConfirm }: DispatchModalProps) {
   if (!target) return null;
 
@@ -190,7 +177,6 @@ export function DispatchModal({ target, onClose, onConfirm }: DispatchModalProps
       style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      {/* key=target.id otomatis reset state jumlah saat zona berganti */}
       <ModalContent key={target.id} target={target} onClose={onClose} onConfirm={onConfirm} />
     </div>
   );

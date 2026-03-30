@@ -1,8 +1,8 @@
 "use client";
 
 import { AppLayout } from "@/components/AppLayout";
-import StatsGrid from "./components/StatsGrid";
-import ZoneTriageList from "./components/ZoneTriageList";
+import StatsGrid from "./_components/StatsGrid";
+import ZoneTriageList from "./_components/ZoneTriageList";
 
 export default function Dashboard() {
   return (
