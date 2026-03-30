@@ -3,7 +3,8 @@ export interface TriageZone {
   id: string;
   name: string;
   location: string;
-  score: number;
+  // null = zona tidak terpantau (belum ada kamera aktif)
+  score: number | null;
   evidence_url: string;
   last_updated: string;
 }
@@ -32,6 +33,9 @@ export const DUMMY_ZONES: TriageZone[] = [
   { id: "z2", name: "Pasar Sudimampur", location: "Kecamatan Barat",   score: 28, evidence_url: "https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=400&h=300&fit=crop", last_updated: "1 Menit Yg Lalu" },
   { id: "z3", name: "Taman Kamboja",    location: "Kecamatan Tengah",  score: 85, evidence_url: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=300&fit=crop", last_updated: "10 Menit Yg Lalu" },
   { id: "z4", name: "Jalan Veteran",    location: "Kecamatan Timur",   score: 62, evidence_url: "https://images.unsplash.com/photo-1595278069441-2cf29f8005a4?w=400&h=300&fit=crop", last_updated: "5 Menit Yg Lalu" },
+  // Zona tanpa kamera — tingkat kebersihan tidak diketahui
+  { id: "z5", name: "Lorong Pahlawan",  location: "Kecamatan Utara",      score: null, evidence_url: "", last_updated: "" },
+  { id: "z6", name: "Terminal Lama",    location: "Kecamatan Barat Daya", score: null, evidence_url: "", last_updated: "" },
 ];
 
 export const DUMMY_CAMERAS: CameraNode[] = [
@@ -42,11 +46,13 @@ export const DUMMY_CAMERAS: CameraNode[] = [
   { id: "c5", zone_id: "z3", name: "Node Kamboja 01",    ip_address: "192.168.1.13", status: true,  active_detections: 0 },
   { id: "c6", zone_id: "z3", name: "Node Kamboja 02",    ip_address: "192.168.1.15", status: true,  active_detections: 0 },
   { id: "c7", zone_id: "z4", name: "CCTV Veteran 01",    ip_address: "192.168.1.14", status: true,  active_detections: 5 },
+  // z5 & z6 sengaja tidak punya kamera
 ];
 
 // ── Utility helpers ──────────────────────────────────────────────────────────
 
-export function getAccentColor(score: number): string {
+export function getAccentColor(score: number | null): string {
+  if (score === null) return "#94a3b8"; // slate-400 — tidak diketahui
   if (score < 50) return "#ef4444";
   if (score < 80) return "#f59e0b";
   return "#22c55e";

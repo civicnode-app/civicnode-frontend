@@ -3,6 +3,7 @@
 import { AppLayout } from "@/components/AppLayout";
 import StatsGrid from "./_components/StatsGrid";
 import ZoneTriageList from "./_components/ZoneTriageList";
+import { SimulationPanel } from "./_components/SimulationPanel";
 
 export default function Dashboard() {
   return (
@@ -13,6 +14,7 @@ export default function Dashboard() {
           <ZoneTriageList />
         </section>
       </main>
+      <SimulationPanel />
     </AppLayout>
   );
 }

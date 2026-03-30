@@ -3,8 +3,8 @@
 import { useState, useRef } from "react";
 import { X, Minus, Plus, Truck, MapPin, AlertTriangle } from "lucide-react";
 import { TriageZone, getAccentColor } from "../_types";
+import { useDashboardStore } from "../_store/useDashboardStore";
 
-const MAX_PERSONEL = 30;
 const MIN_PERSONEL = 1;
 
 interface DispatchModalProps {
@@ -24,14 +24,15 @@ function ModalContent({
   onClose: () => void;
   onConfirm: (zone: TriageZone, jumlah: number) => void;
 }) {
-  const [jumlah, setJumlah] = useState(3);
+  const maxPersonel = useDashboardStore((s) => s.armadaSiaga);
+  const [jumlah, setJumlah] = useState(() => Math.min(3, useDashboardStore.getState().armadaSiaga));
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isCritical  = target.score < 50;
   const accentColor = getAccentColor(target.score);
 
   function clamp(val: number) {
-    return Math.max(MIN_PERSONEL, Math.min(MAX_PERSONEL, val));
+    return Math.max(MIN_PERSONEL, Math.min(maxPersonel, val));
   }
 
   function handleInput(raw: string) {
@@ -45,7 +46,7 @@ function ModalContent({
     onClose();
   }
 
-  const sliderPercent = ((jumlah - MIN_PERSONEL) / (MAX_PERSONEL - MIN_PERSONEL)) * 100;
+  const sliderPercent = ((jumlah - MIN_PERSONEL) / (maxPersonel - MIN_PERSONEL)) * 100;
 
   return (
     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden">
@@ -74,8 +75,18 @@ function ModalContent({
         </button>
       </div>
 
+      {/* Armada habis */}
+      {maxPersonel === 0 && (
+        <div className="mx-6 mb-4 flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+          <Truck className="w-4 h-4 text-slate-400 shrink-0" />
+          <p className="text-xs font-bold text-slate-500">
+            Semua Armada Siaga sedang bertugas. Tunggu hingga petugas kembali ke markas.
+          </p>
+        </div>
+      )}
+
       {/* Critical warning */}
-      {isCritical && (
+      {isCritical && maxPersonel > 0 && (
         <div className="mx-6 mb-4 flex items-center gap-2.5 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
           <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
           <p className="text-xs font-bold text-red-600">
@@ -84,8 +95,8 @@ function ModalContent({
         </div>
       )}
 
-      {/* Controls */}
-      <div className="px-6 pb-2 flex flex-col gap-6">
+      {/* Controls — disembunyikan kalau armada habis */}
+      <div className={`px-6 pb-2 flex flex-col gap-6 ${maxPersonel === 0 ? "opacity-30 pointer-events-none select-none" : ""}`}>
 
         {/* Jumlah display + tombol +/- */}
         <div className="flex items-center justify-between gap-4">
@@ -103,7 +114,7 @@ function ModalContent({
               ref={inputRef}
               type="number"
               min={MIN_PERSONEL}
-              max={MAX_PERSONEL}
+              max={maxPersonel}
               value={jumlah}
               onChange={(e) => handleInput(e.target.value)}
               className="w-16 text-center text-2xl font-black text-slate-800 border-2 border-slate-200 rounded-xl py-1.5 focus:outline-none focus:border-[#588157] transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -111,7 +122,7 @@ function ModalContent({
 
             <button
               onClick={() => setJumlah(clamp(jumlah + 1))}
-              disabled={jumlah >= MAX_PERSONEL}
+              disabled={jumlah >= maxPersonel}
               className="w-9 h-9 rounded-full border-2 border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-white"
             >
               <Plus className="w-4 h-4" />
@@ -129,7 +140,7 @@ function ModalContent({
             <input
               type="range"
               min={MIN_PERSONEL}
-              max={MAX_PERSONEL}
+              max={maxPersonel}
               value={jumlah}
               onChange={(e) => setJumlah(Number(e.target.value))}
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -137,7 +148,7 @@ function ModalContent({
           </div>
           <div className="flex justify-between text-[10px] font-bold text-slate-300">
             <span>{MIN_PERSONEL} orang</span>
-            <span>{MAX_PERSONEL} orang</span>
+            <span>{maxPersonel} orang</span>
           </div>
         </div>
       </div>
@@ -152,15 +163,15 @@ function ModalContent({
         </button>
         <button
           onClick={handleConfirm}
-          className="flex-2 py-3 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-2 transition-colors cursor-pointer border-2"
-          style={{
-            backgroundColor: accentColor,
-            borderColor: accentColor,
-            boxShadow: `0 4px 14px ${accentColor}40`,
-          }}
+          disabled={maxPersonel === 0}
+          className="flex-2 py-3 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-2 transition-colors border-2 disabled:cursor-not-allowed"
+          style={maxPersonel > 0
+            ? { backgroundColor: accentColor, borderColor: accentColor, boxShadow: `0 4px 14px ${accentColor}40` }
+            : { backgroundColor: "#94a3b8", borderColor: "#94a3b8" }
+          }
         >
           <Truck className="w-4 h-4" />
-          Laksanakan · {jumlah} Personel
+          {maxPersonel > 0 ? `Laksanakan · ${jumlah} Personel` : "Armada Tidak Tersedia"}
         </button>
       </div>
     </div>

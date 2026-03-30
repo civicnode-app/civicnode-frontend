@@ -1,5 +1,23 @@
 # Progress Log
 
+## Sesi 2026-03-30
+
+### Yang Sudah Selesai
+
+#### Dashboard — Simulation System (Demo Mode)
+
+- ✅ **Sistem simulasi dispatch petugas** — Kirim petugas ke zona → badge "N Petugas di Lapangan" muncul di card, setelah `TRAVEL_TO_FIELD_MS` score zona naik `jumlah × POINTS_PER_OFFICER` per tick, saat score ≥ 90% badge hilang, setelah `TRAVEL_RETURN_MS` armada bertambah kembali
+- ✅ **Active Detections & Zone Reputation sinkron** — Active Detections jadi state independen (bukan random), naik tiap `DEGRADATION_MS` + turun saat recovery. Zone Reputation = rata-rata score zona terpantau
+- ✅ **`simulation.config.ts`** — Semua konstanta simulasi terpusat (travel time, degradasi, recovery speed, poin/petugas, armada awal)
+- ✅ **SimulationPanel** — Panel config real-time (tombol gear pojok kanan bawah), semua parameter bisa diubah langsung dari UI tanpa edit kode
+- ✅ **Dispatch dibatasi Armada Siaga** — Max personel di modal = jumlah armada siaga saat ini, tombol berubah "Armada Tidak Tersedia" kalau habis
+- ✅ **Zona Tidak Terpantau** — 2 zona baru (`Lorong Pahlawan`, `Terminal Lama`) dengan `score: null`, desain card berbeda (placeholder CameraOff, tombol "Kirim Inspeksi"), selalu di bawah grid, tidak terpengaruh degradasi
+- ✅ **Fix: React `{0}` rendering bug** — Badge dispatch muncul angka "0" diperbaiki ke `(value ?? 0) > 0`
+- ✅ **Fix: floating point score** — Score dibulatkan di store (`Math.round(x * 100) / 100`) + display `parseFloat(toFixed(2))`
+- ✅ **Docs** — tambah `docs/dashboard-simulation-system.md`
+
+---
+
 ## Sesi 2026-03-29
 
 ### Yang Sudah Selesai

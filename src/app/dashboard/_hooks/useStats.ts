@@ -1,35 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { RealtimeStats, detectionLevel, scoreGrade } from "../_types";
+import { useEffect } from "react";
+import { detectionLevel, scoreGrade } from "../_types";
 import { useDashboardStore } from "../_store/useDashboardStore";
+const MIN_ZONE_SCORE = 0;
 
 export function useStats() {
-  const armadaSiaga = useDashboardStore((s) => s.armadaSiaga);
+  const armadaSiaga      = useDashboardStore((s) => s.armadaSiaga);
+  const activeDetections = useDashboardStore((s) => s.activeDetections);
+  const zones            = useDashboardStore((s) => s.zones);
+  const degradationMs    = useDashboardStore((s) => s.config.degradationMs);
 
-  const [stats, setStats] = useState<Omit<RealtimeStats, "armada_siaga">>({
-    active_detections: 12,
-    zone_reputation: 64,
-  });
+  // Zone Reputation hanya dihitung dari zona yang terpantau (score !== null)
+  const monitored = zones.filter((z) => z.score !== null);
+  const zone_reputation = monitored.length > 0
+    ? Math.round(monitored.reduce((sum, z) => sum + (z.score as number), 0) / monitored.length)
+    : 0;
 
+  // Tiap tick: active detections naik 1, lalu 1 zona random (yang tidak sedang
+  // dibersihkan petugas) kehilangan 1 poin kebersihan.
+  // Interval di-restart otomatis setiap degradationMs berubah dari panel config.
   useEffect(() => {
     const interval = setInterval(() => {
-      setStats((prev) => ({
-        active_detections: Math.max(
-          0,
-          prev.active_detections +
-            (Math.random() > 0.5 ? 1 : -1) * Math.floor(Math.random() * 3),
-        ),
-        zone_reputation: Math.round(
-          Math.min(100, Math.max(30, prev.zone_reputation + (Math.random() - 0.5) * 1.5)),
-        ),
-      }));
-    }, 2000);
+      const { zones: cur, zoneDispatches, addDetection, updateZoneScore } =
+        useDashboardStore.getState();
+
+      addDetection();
+
+      const available = cur.filter(
+        (z) => !zoneDispatches[z.id] && z.score !== null && z.score > MIN_ZONE_SCORE,
+      );
+      if (available.length === 0) return;
+
+      const target = available[Math.floor(Math.random() * available.length)];
+      updateZoneScore(target.id, (target.score as number) - 1);
+    }, degradationMs);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [degradationMs]);
 
-  const repGrade  = scoreGrade(stats.zone_reputation);
-  const detLevel  = detectionLevel(stats.active_detections);
+  const repGrade = scoreGrade(zone_reputation);
+  const detLevel = detectionLevel(activeDetections);
 
-  return { stats: { ...stats, armada_siaga: armadaSiaga }, repGrade, detLevel };
+  return {
+    stats: { active_detections: activeDetections, zone_reputation, armada_siaga: armadaSiaga },
+    repGrade,
+    detLevel,
+  };
 }
