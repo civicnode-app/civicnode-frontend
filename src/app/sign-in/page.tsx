@@ -3,9 +3,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { setAuthToken } from "@/lib/auth";
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
-
 export default function SignIn() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -44,9 +41,9 @@ export default function SignIn() {
         throw new Error("Tidak ada akun MetaMask yang dipilih.");
       const wallet_address = accounts[0];
 
-      // Step 2: minta nonce dari backend
+      // Step 2: minta nonce dari Next.js API
       const nonceRes = await fetch(
-        `${BACKEND_URL}/api/auth/nonce?address=${wallet_address}`,
+        `/api/auth/nonce?address=${wallet_address}`,
         { headers: { Accept: "application/json" } },
       );
       // Jika server tidak ok, lempar error
@@ -62,8 +59,8 @@ export default function SignIn() {
         params: [nonce, wallet_address],
       })) as string;
 
-      // Step 4: kirim ke backend untuk verifikasi
-      const res = await fetch(`${BACKEND_URL}/api/auth/metamask`, {
+      // Step 4: kirim ke Next.js API untuk verifikasi
+      const res = await fetch(`/api/auth/metamask`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

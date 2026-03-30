@@ -28,7 +28,7 @@ function ModalContent({
   const [jumlah, setJumlah] = useState(() => Math.min(3, useDashboardStore.getState().armadaSiaga));
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const isCritical  = target.score < 50;
+  const isCritical  = target.score !== null && target.score < 50;
   const accentColor = getAccentColor(target.score);
 
   function clamp(val: number) {

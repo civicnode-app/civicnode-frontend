@@ -1,5 +1,25 @@
 # Progress Log
 
+## Sesi 2026-03-30 (lanjutan 3)
+
+### Yang Sudah Selesai
+
+#### Auth — Migrasi ke Next.js API Routes
+
+- ✅ **`/api/auth/nonce`** — Generate nonce random (32-byte hex), simpan di in-memory store dengan TTL 5 menit
+- ✅ **`/api/auth/metamask`** — Verifikasi tanda tangan MetaMask via `ethers.verifyMessage()`, cek nonce, terbitkan JWT 24 jam
+- ✅ **`/api/auth/me`** — Verifikasi JWT, kembalikan profil pengguna (tanpa database, data dari payload token)
+- ✅ **`src/middleware.ts`** — Aktifkan `proxy.ts` sebagai Next.js middleware (route protection, redirect unauthenticated users)
+- ✅ **`src/lib/nonce-store.ts`** — Singleton in-memory Map untuk nonce storage
+- ✅ **Hapus rewrite proxy** di `next.config.ts` — tidak ada lagi forward ke `localhost:3001`
+- ✅ **`sign-in/page.tsx`** — URL fetch dari `${BACKEND_URL}/api/auth/*` → `/api/auth/*` (relative)
+- ✅ **`system-config/page.tsx`** — URL fetch dari `${BACKEND_URL}/api/auth/me` → `/api/auth/me`
+- ✅ **`package.json`** — `ethers` + `jsonwebtoken` masuk `dependencies` (production-safe)
+- ✅ **`.env` / `.env.example`** — Hapus `NEXT_PUBLIC_BACKEND_URL`, tambah `JWT_SECRET`
+- ✅ **Fix TypeScript** — `DispatchModal.tsx` null guard untuk `target.score`
+
+---
+
 ## Sesi 2026-03-30 (lanjutan 2)
 
 ### Yang Sudah Selesai

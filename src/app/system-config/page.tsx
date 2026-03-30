@@ -4,8 +4,6 @@ import { AppLayout } from "@/components/AppLayout";
 import { WalletAvatar } from "@/components/WalletAvatar";
 import { getAuthToken } from "@/lib/auth";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
-
 interface StaffProfile {
   id: string;
   full_name: string;
@@ -26,7 +24,7 @@ export default function SystemConfigPage() {
     const token = getAuthToken();
     if (!token) return;
 
-    fetch(`${BACKEND_URL}/api/auth/me`, {
+    fetch(`/api/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())

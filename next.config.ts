@@ -21,17 +21,6 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Proxy all /api/* requests to the Express backend (port 4000)
-  // From the browser everything appears on port 3000.
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "http://localhost:3001/api/:path*",
-      },
-    ];
-  },
-
   // Image optimization
   images: {
     formats: ["image/avif", "image/webp"],
