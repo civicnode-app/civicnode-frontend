@@ -2,10 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { DUMMY_CAMERAS, DUMMY_ZONES, TriageZone } from "../_types";
+import { useDashboardStore } from "../_store/useDashboardStore";
 
 export function useZoneTriage() {
   const [zones] = useState<TriageZone[]>(DUMMY_ZONES);
   const [dispatchTarget, setDispatchTarget] = useState<TriageZone | null>(null);
+  const dispatchPersonel = useDashboardStore((s) => s.dispatchPersonel);
 
   // Zona paling kritis (skor terendah) tampil di atas
   const sortedZones = useMemo(
@@ -28,7 +30,7 @@ export function useZoneTriage() {
   }
 
   function handleDispatchConfirm(zone: TriageZone, jumlah: number) {
-    // Placeholder: disambungkan ke API dispatching ketika backend siap
+    dispatchPersonel(jumlah); // kurangi armada siaga dari store
     console.log(`Mengirim ${jumlah} petugas ke ${zone.name}`);
   }
 
