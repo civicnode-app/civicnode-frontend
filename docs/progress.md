@@ -1,5 +1,22 @@
 # Progress Log
 
+## Sesi 2026-03-30 (lanjutan 2)
+
+### Yang Sudah Selesai
+
+#### Dashboard & CCTV — Sinkronisasi Deteksi Real-time
+
+- ✅ **Deteksi aktif per-kamera** — `active_detections` bukan lagi integer global, tapi per-kamera di store (`cameras: CameraNode[]`). Global total = akumulasi dari semua kamera.
+- ✅ **`incrementZoneDetection(zoneId)`** — saat zona degradasi, kamera random di zona itu yang di-increment (+1), bukan counter global. Menggantikan `addDetection()`.
+- ✅ **`decrementZoneDetections(zoneId, amount)`** — saat petugas recovery, deteksi di kamera zona itu yang dikurangi. Menggantikan `removeDetections()`.
+- ✅ **Halaman CCTV real-time** — `useCctv.ts` subscribe ke `storeCameras` dari dashboard store; setiap card kamera otomatis re-render saat `active_detections` berubah.
+- ✅ **`SimulationProvider`** — interval degradasi dipindah dari `useStats.ts` ke provider global yang di-mount di `AppLayout`. Simulasi tetap jalan di semua halaman, tidak berhenti saat user navigasi keluar dashboard.
+- ✅ **Recovery timer persistent** — `recoveryTimers`, `travelTimeouts`, `returnTimeouts` di `useZoneTriage` dipindah dari `useRef` ke module-level variable. Timer tidak mati saat komponen unmount.
+- ✅ **Hapus Confidence dari card CCTV** — tidak relevan untuk admin dashboard. Info grid jadi 3 kolom: IP Address · Jenis · Deteksi Aktif.
+- ✅ **Redesain card CCTV** — layout horizontal (bukan aspect-ratio 1:1), grid 2 kolom, informasi lebih padat.
+
+---
+
 ## Sesi 2026-03-30 (lanjutan)
 
 ### Yang Sudah Selesai

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { DUMMY_ZONES, TriageZone } from "../_types";
+import { DUMMY_ZONES, DUMMY_CAMERAS, TriageZone, CameraNode } from "../_types";
 import {
   INITIAL_ARMADA_SIAGA,
   TRAVEL_TO_FIELD_MS,
@@ -17,15 +17,12 @@ export interface SimConfig {
   pointsPerOfficer: number;
 }
 
-const initialActiveDetections = DUMMY_ZONES.reduce(
-  (sum, z) => sum + (z.score !== null ? Math.max(0, Math.floor((80 - z.score) / 15)) : 0),
-  0,
-);
-
 interface DashboardStore {
   armadaSiaga: number;
+  // activeDetections = sum of active_detections semua kamera (diupdate bersama cameras)
   activeDetections: number;
   zones: TriageZone[];
+  cameras: CameraNode[];
   zoneDispatches: Record<string, number>;
   config: SimConfig;
 
@@ -33,22 +30,25 @@ interface DashboardStore {
   updateZoneScore: (zoneId: string, score: number) => void;
   clearZoneDispatch: (zoneId: string) => void;
   returnPersonel: (jumlah: number) => void;
-  addDetection: () => void;
-  removeDetections: (amount: number) => void;
+  // Degradasi: +1 ke kamera random di zona itu + +1 ke total
+  incrementZoneDetection: (zoneId: string) => void;
+  // Recovery: -floor(amount) dari kamera di zona itu + update total
+  decrementZoneDetections: (zoneId: string, amount: number) => void;
   updateConfig: (patch: Partial<SimConfig>) => void;
   setArmada: (jumlah: number) => void;
 }
 
 export const useDashboardStore = create<DashboardStore>((set) => ({
-  armadaSiaga: INITIAL_ARMADA_SIAGA,
-  activeDetections: initialActiveDetections,
-  zones: DUMMY_ZONES,
-  zoneDispatches: {},
+  armadaSiaga:      INITIAL_ARMADA_SIAGA,
+  activeDetections: DUMMY_CAMERAS.reduce((sum, c) => sum + c.active_detections, 0),
+  zones:            DUMMY_ZONES,
+  cameras:          DUMMY_CAMERAS,
+  zoneDispatches:   {},
   config: {
-    travelToFieldMs: TRAVEL_TO_FIELD_MS,
-    travelReturnMs:  TRAVEL_RETURN_MS,
-    degradationMs:   DEGRADATION_MS,
-    recoveryTickMs:  RECOVERY_TICK_MS,
+    travelToFieldMs:  TRAVEL_TO_FIELD_MS,
+    travelReturnMs:   TRAVEL_RETURN_MS,
+    degradationMs:    DEGRADATION_MS,
+    recoveryTickMs:   RECOVERY_TICK_MS,
     pointsPerOfficer: POINTS_PER_OFFICER,
   },
 
@@ -75,9 +75,48 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
       return { zoneDispatches: next };
     }),
 
-  returnPersonel:   (jumlah) => set((s) => ({ armadaSiaga: s.armadaSiaga + jumlah })),
-  addDetection:     ()       => set((s) => ({ activeDetections: s.activeDetections + 1 })),
-  removeDetections: (amount) => set((s) => ({ activeDetections: Math.max(0, s.activeDetections - amount) })),
-  updateConfig:     (patch)  => set((s) => ({ config: { ...s.config, ...patch } })),
-  setArmada:        (jumlah) => set({ armadaSiaga: jumlah }),
+  returnPersonel: (jumlah) => set((s) => ({ armadaSiaga: s.armadaSiaga + jumlah })),
+
+  incrementZoneDetection: (zoneId) =>
+    set((s) => {
+      const zoneCams = s.cameras.filter((c) => c.zone_id === zoneId && c.status);
+      if (zoneCams.length === 0) return { activeDetections: s.activeDetections + 1 };
+      const target = zoneCams[Math.floor(Math.random() * zoneCams.length)];
+      return {
+        cameras: s.cameras.map((c) =>
+          c.id === target.id ? { ...c, active_detections: c.active_detections + 1 } : c,
+        ),
+        activeDetections: s.activeDetections + 1,
+      };
+    }),
+
+  decrementZoneDetections: (zoneId, amount) =>
+    set((s) => {
+      const units = Math.floor(amount);
+      if (units <= 0) return {};
+
+      // Salin array supaya bisa dimutasi dalam loop
+      const cameras = s.cameras.map((c) => ({ ...c }));
+      let reduced = 0;
+
+      for (let i = 0; i < units; i++) {
+        const available = cameras
+          .map((c, idx) => ({ c, idx }))
+          .filter(({ c }) => c.zone_id === zoneId && c.active_detections > 0);
+        if (available.length === 0) break;
+
+        const { idx } =
+          available[Math.floor(Math.random() * available.length)];
+        cameras[idx].active_detections -= 1;
+        reduced++;
+      }
+
+      return {
+        cameras,
+        activeDetections: Math.max(0, s.activeDetections - reduced),
+      };
+    }),
+
+  updateConfig: (patch) => set((s) => ({ config: { ...s.config, ...patch } })),
+  setArmada:    (jumlah) => set({ armadaSiaga: jumlah }),
 }));

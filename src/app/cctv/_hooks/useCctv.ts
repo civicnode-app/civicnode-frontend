@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { CCTVNode } from "../_types";
+import { useDashboardStore } from "@/app/dashboard/_store/useDashboardStore";
 
 type CctvForm = {
   nama: string; zona_id: string; jenis_kamera: string;
@@ -39,6 +40,7 @@ interface Options {
 
 export function useCctv({ showToast, showConfirm, closeDialog }: Options) {
   const [cctvList, setCctvList]         = useState<CCTVNode[]>(INITIAL_CCTVS);
+  const storeCameras                    = useDashboardStore((s) => s.cameras);
   const cctvLoading                     = false; // Disable loading spinner for presentation
   const [modalOpen, setModalOpen]     = useState(false);
   const [editTarget, setEditTarget]   = useState<CCTVNode | null>(null);
@@ -131,8 +133,14 @@ export function useCctv({ showToast, showConfirm, closeDialog }: Options) {
     });
   }
 
+  // Merge active_detections real-time dari dashboard store ke setiap card
+  const liveList = cctvList.map((node) => {
+    const live = storeCameras.find((c) => c.id === node.id);
+    return live ? { ...node, active_detections: live.active_detections } : node;
+  });
+
   return {
-    cctvList, cctvLoading,
+    cctvList: liveList, cctvLoading,
     modalOpen, editTarget, form, setForm, saving, formError,
     openAdd, openEdit, closeModal, handleSubmit, handleDelete,
   };
