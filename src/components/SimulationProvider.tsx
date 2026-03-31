@@ -2,6 +2,8 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useDashboardStore } from "@/app/dashboard/_store/useDashboardStore";
+import { useCctvStore } from "@/app/cctv/_store/useCctvStore";
+import { useZonaStore } from "@/app/cctv/_store/useZonaStore";
 
 const MIN_ZONE_SCORE = 0;
 
@@ -11,6 +13,12 @@ const MIN_ZONE_SCORE = 0;
  */
 export function SimulationProvider({ children }: { children: ReactNode }) {
   const degradationMs = useDashboardStore((s) => s.config.degradationMs);
+
+  // Sinkronkan data baru dari tools/db.json ke store saat pertama mount
+  useEffect(() => {
+    useCctvStore.getState().mergeFromSeed();
+    useZonaStore.getState().mergeFromSeed();
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {

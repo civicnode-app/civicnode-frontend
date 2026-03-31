@@ -23,18 +23,29 @@ const INITIAL_CCTVS: CCTVNode[] = [
 
 interface CctvStore {
   cctvList: CCTVNode[];
-  addCctv:    (node: CCTVNode) => void;
-  updateCctv: (id: string, patch: Partial<CCTVNode>) => void;
-  deleteCctv: (id: string) => void;
+  addCctv:       (node: CCTVNode) => void;
+  updateCctv:    (id: string, patch: Partial<CCTVNode>) => void;
+  deleteCctv:    (id: string) => void;
+  mergeFromSeed: () => Promise<void>;
 }
 
 export const useCctvStore = create<CctvStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       cctvList: INITIAL_CCTVS,
-      addCctv:    (node)       => set((s) => ({ cctvList: [...s.cctvList, node] })),
-      updateCctv: (id, patch)  => set((s) => ({ cctvList: s.cctvList.map((c) => c.id === id ? { ...c, ...patch } : c) })),
-      deleteCctv: (id)         => set((s) => ({ cctvList: s.cctvList.filter((c) => c.id !== id) })),
+      addCctv:    (node)      => set((s) => ({ cctvList: [...s.cctvList, node] })),
+      updateCctv: (id, patch) => set((s) => ({ cctvList: s.cctvList.map((c) => c.id === id ? { ...c, ...patch } : c) })),
+      deleteCctv: (id)        => set((s) => ({ cctvList: s.cctvList.filter((c) => c.id !== id) })),
+      mergeFromSeed: async () => {
+        try {
+          const res  = await fetch("/api/seed");
+          const { cctvList: seed } = await res.json() as { cctvList: CCTVNode[] };
+          if (!seed?.length) return;
+          const existing = new Set(get().cctvList.map((c) => c.id));
+          const newItems = seed.filter((c) => !existing.has(c.id));
+          if (newItems.length) set((s) => ({ cctvList: [...s.cctvList, ...newItems] }));
+        } catch { /* server mungkin belum jalan */ }
+      },
     }),
     { name: "civicnode-cctv" },
   ),

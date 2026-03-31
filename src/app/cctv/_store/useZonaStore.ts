@@ -13,18 +13,29 @@ const INITIAL_ZONAS: Zona[] = [
 
 interface ZonaStore {
   zonaList: Zona[];
-  addZona:    (zona: Zona) => void;
-  updateZona: (id: string, patch: Partial<Zona>) => void;
-  deleteZona: (id: string) => void;
+  addZona:       (zona: Zona) => void;
+  updateZona:    (id: string, patch: Partial<Zona>) => void;
+  deleteZona:    (id: string) => void;
+  mergeFromSeed: () => Promise<void>;
 }
 
 export const useZonaStore = create<ZonaStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       zonaList: INITIAL_ZONAS,
       addZona:    (zona)      => set((s) => ({ zonaList: [...s.zonaList, zona] })),
       updateZona: (id, patch) => set((s) => ({ zonaList: s.zonaList.map((z) => z.id === id ? { ...z, ...patch } : z) })),
       deleteZona: (id)        => set((s) => ({ zonaList: s.zonaList.filter((z) => z.id !== id) })),
+      mergeFromSeed: async () => {
+        try {
+          const res = await fetch("/api/seed");
+          const { zonaList: seed } = await res.json() as { zonaList: Zona[] };
+          if (!seed?.length) return;
+          const existing = new Set(get().zonaList.map((z) => z.id));
+          const newItems = seed.filter((z) => !existing.has(z.id));
+          if (newItems.length) set((s) => ({ zonaList: [...s.zonaList, ...newItems] }));
+        } catch { /* server mungkin belum jalan */ }
+      },
     }),
     { name: "civicnode-zona" },
   ),
