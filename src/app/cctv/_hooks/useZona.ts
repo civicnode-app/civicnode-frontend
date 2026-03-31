@@ -1,17 +1,9 @@
 "use client";
 import { useState } from "react";
 import { Zona } from "../_types";
+import { useZonaStore } from "../_store/useZonaStore";
 
 type ZonaForm = { nama: string; deskripsi: string };
-
-const INITIAL_ZONAS: Zona[] = [
-  { id: "z1", nama: "Simpang Antasari", deskripsi: "Area persimpangan lalu-lintas utama yang berpotensi rawan tumpukan sampah.", zone_reputation: 42 },
-  { id: "z2", nama: "Pasar Sudimampur", deskripsi: "Pusat perbelanjaan grosir tradisional dengan volume limbah domestik tinggi.", zone_reputation: 28 },
-  { id: "z3", nama: "Taman Kamboja",    deskripsi: "Taman terbuka rekreasi hijau yang dilengkapi banyak tempat sampah terpisah.", zone_reputation: 85 },
-  { id: "z4", nama: "Jalan Veteran",    deskripsi: "Jalur utama kuliner dan pejalan kaki lintas kecamatan.", zone_reputation: 62 },
-  { id: "z5", nama: "Lorong Pahlawan",  deskripsi: "Belum ada kamera CCTV yang terpasang. Tingkat kebersihan tidak dapat dipantau.", zone_reputation: 0 },
-  { id: "z6", nama: "Terminal Lama",    deskripsi: "Belum ada kamera CCTV yang terpasang. Tingkat kebersihan tidak dapat dipantau.", zone_reputation: 0 },
-];
 
 interface Options {
   showToast: (msg: string) => void;
@@ -20,10 +12,10 @@ interface Options {
 }
 
 export function useZona({ showToast, showConfirm, closeDialog }: Options) {
-  const [zonaList, setZonaList]   = useState<Zona[]>(INITIAL_ZONAS);
-  const zonaLoading               = false; // Disable loading for presentation
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const { zonaList, addZona, updateZona, deleteZona } = useZonaStore();
 
+  const zonaLoading               = false;
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [modalOpen, setModalOpen]   = useState(false);
   const [editTarget, setEditTarget] = useState<Zona | null>(null);
   const [form, setForm]             = useState<ZonaForm>({ nama: "", deskripsi: "" });
@@ -59,27 +51,21 @@ export function useZona({ showToast, showConfirm, closeDialog }: Options) {
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     if (!form.nama.trim()) { setFormError("Nama zona wajib diisi."); return; }
-    
+
     setSaving(true);
     setFormError("");
 
-    // Simulate network delay
     setTimeout(() => {
       if (editTarget) {
-        setZonaList(prev => prev.map(z => z.id === editTarget.id ? {
-          ...z,
-          nama: form.nama,
-          deskripsi: form.deskripsi,
-        } : z));
+        updateZona(editTarget.id, { nama: form.nama, deskripsi: form.deskripsi });
         showToast("Zona berhasil diperbarui.");
       } else {
-        const newZona: Zona = {
+        addZona({
           id: `new-${Date.now()}`,
           nama: form.nama,
           deskripsi: form.deskripsi,
-          zone_reputation: 50, // Default reputasi
-        };
-        setZonaList(prev => [...prev, newZona]);
+          zone_reputation: 50,
+        });
         showToast("Zona berhasil ditambahkan.");
       }
       setSaving(false);
@@ -90,7 +76,7 @@ export function useZona({ showToast, showConfirm, closeDialog }: Options) {
   function handleDelete(zona: Zona) {
     showConfirm(`Hapus zona "${zona.nama}"?`, () => {
       closeDialog();
-      setZonaList(prev => prev.filter(z => z.id !== zona.id));
+      deleteZona(zona.id);
       showToast("Zona berhasil dihapus.");
     });
   }
