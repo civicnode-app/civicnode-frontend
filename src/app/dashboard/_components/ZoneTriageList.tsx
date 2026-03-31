@@ -1,12 +1,30 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { AlertTriangle, MapPin, Search, ChevronRight, CheckCircle2, Video, Wifi, WifiOff, Users, CameraOff, Cctv } from "lucide-react";
+import { AlertTriangle, MapPin, Search, ChevronRight, CheckCircle2, Video, Wifi, WifiOff, Users, CameraOff, Cctv, Layers } from "lucide-react";
 import { DispatchModal } from "./DispatchModal";
 import { useZoneTriage } from "../_hooks/useZoneTriage";
 import { getAccentColor } from "../_types";
+
+type Filter = "semua" | "kritis" | "kotor" | "bersih";
+
+const FILTERS: { id: Filter; label: string; color: string; activeClass: string }[] = [
+  { id: "semua",  label: "Semua Zona",    color: "#64748b", activeClass: "bg-white text-slate-700" },
+  { id: "kritis", label: "Zona Kritis",   color: "#ef4444", activeClass: "bg-red-500 text-white"   },
+  { id: "kotor",  label: "Zona Kotor",    color: "#f97316", activeClass: "bg-orange-500 text-white" },
+  { id: "bersih", label: "Zona Bersih",   color: "#588157", activeClass: "bg-[#588157] text-white"  },
+];
+
+function matchFilter(score: number | null, filter: Filter): boolean {
+  if (filter === "semua")  return true;
+  if (filter === "kritis") return score === null || score < 40;
+  if (filter === "kotor")  return score !== null && score >= 40 && score < 80;
+  if (filter === "bersih") return score !== null && score >= 80;
+  return true;
+}
 
 export default function ZoneTriageList() {
   const {
@@ -20,6 +38,8 @@ export default function ZoneTriageList() {
     handleDispatchConfirm,
   } = useZoneTriage();
   const router = useRouter();
+
+  const [activeFilter, setActiveFilter] = useState<Filter>("semua");
 
   return (
     <div className="flex flex-col gap-5 w-full">
@@ -37,9 +57,38 @@ export default function ZoneTriageList() {
         </div>
       </div>
 
+      {/* Filter tabs */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {FILTERS.map(({ id, label, activeClass }) => {
+          const count = id === "semua"
+            ? sortedZones.length
+            : sortedZones.filter((z) => matchFilter(z.score, id)).length;
+          const isActive = activeFilter === id;
+          return (
+            <button
+              key={id}
+              onClick={() => setActiveFilter(id)}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[12px] font-black border-none cursor-pointer transition-all duration-200 ${
+                isActive
+                  ? activeClass
+                  : "bg-white/15 text-white/70 hover:bg-white/25 hover:text-white"
+              }`}
+            >
+              {id === "semua" && <Layers size={11} strokeWidth={2.5} />}
+              {label}
+              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${
+                isActive ? "bg-black/15" : "bg-white/20"
+              }`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* 2-column grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        {sortedZones.map((zone) => {
+        {sortedZones.filter((z) => matchFilter(z.score, activeFilter)).map((zone) => {
           const isUnmonitored = zone.score === null;
           const isCritical    = zone.score !== null && zone.score < 50;
           const accentColor   = getAccentColor(zone.score);
