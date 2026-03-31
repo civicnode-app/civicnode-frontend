@@ -7,10 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed:add-cctv": "node tools/add-cctv.js",
-    "seed:add-zona": "node tools/add-zona.js",
-    "seed:list":     "node tools/list.js",
-    "seed:reset":    "node tools/reset.js"
+    "seed:add-cctv": "node tools/add-cctv.mjs",
+    "seed:add-zona": "node tools/add-zona.mjs",
+    "seed:list":     "node tools/list.mjs",
+    "seed:reset":    "node tools/reset.mjs"
   },
   "dependencies": {
     "@radix-ui/react-scroll-area": "^1.2.10",
