@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { TriageZone } from "../_types";
 import { useDashboardStore } from "../_store/useDashboardStore";
+import { useCctvStore } from "@/app/cctv/_store/useCctvStore";
 
 // Score ≥ GREEN_THRESHOLD → zona dianggap sudah bersih, petugas boleh pulang
 const GREEN_THRESHOLD = 90;
@@ -16,6 +17,7 @@ export function useZoneTriage() {
   const zones          = useDashboardStore((s) => s.zones);
   const cameras        = useDashboardStore((s) => s.cameras);
   const zoneDispatches = useDashboardStore((s) => s.zoneDispatches);
+  const cctvList       = useCctvStore((s) => s.cctvList);
 
   const [dispatchTarget, setDispatchTarget] = useState<TriageZone | null>(null);
 
@@ -33,7 +35,12 @@ export function useZoneTriage() {
   const activeCameraCount = cameras.filter((c) => c.status).length;
 
   function getCamerasForZone(zoneId: string) {
-    return cameras.filter((c) => c.zone_id === zoneId);
+    return cameras
+      .filter((c) => c.zone_id === zoneId)
+      .map((c) => {
+        const cctv = cctvList.find((n) => n.id === c.id);
+        return cctv ? { ...c, name: cctv.nama } : c;
+      });
   }
 
   function openDispatch(zone: TriageZone)  { setDispatchTarget(zone); }
