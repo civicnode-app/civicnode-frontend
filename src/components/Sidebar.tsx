@@ -52,24 +52,24 @@ export function Sidebar() {
       )}
     >
       {/* Toggle button */}
-      <div className={cn("relative group mb-5", collapsed ? "flex justify-center" : "flex justify-end")}>
+      <div className={cn("relative mb-5", collapsed ? "flex justify-center" : "flex justify-end")}>
         <button
           onClick={toggle}
-          className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#a3b18a] hover:bg-[#588157] text-white transition-colors duration-200 cursor-pointer border-none shrink-0"
+          className="group relative flex items-center justify-center w-8 h-8 rounded-xl bg-[#a3b18a] hover:bg-[#588157] text-white transition-colors duration-200 cursor-pointer border-none shrink-0"
         >
           {collapsed
             ? <PanelLeftOpen  size={16} strokeWidth={2} />
             : <PanelLeftClose size={16} strokeWidth={2} />
           }
-        </button>
 
-        {/* Tooltip toggle */}
-        <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 flex items-center gap-2.5 px-3 py-2 bg-[#1a1a1a] text-white text-[12px] font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow-lg">
-          {collapsed ? <PanelLeftOpen size={14} strokeWidth={2} /> : <PanelLeftClose size={14} strokeWidth={2} />}
-          <span>{collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}</span>
-          <kbd className="ml-1 px-1.5 py-0.5 bg-white/15 rounded text-[10px] font-mono font-bold">Ctrl+B</kbd>
-          <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#1a1a1a]" />
-        </div>
+          {/* Tooltip toggle */}
+          <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 flex items-center gap-2.5 px-3 py-2 bg-[#1a1a1a] text-white text-[12px] font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow-lg">
+            {collapsed ? <PanelLeftOpen size={14} strokeWidth={2} /> : <PanelLeftClose size={14} strokeWidth={2} />}
+            <span>{collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}</span>
+            <kbd className="ml-1 px-1.5 py-0.5 bg-white/15 rounded text-[10px] font-mono font-bold">Ctrl+B</kbd>
+            <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#1a1a1a]" />
+          </div>
+        </button>
       </div>
 
       {/* Nav items */}
