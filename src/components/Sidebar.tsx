@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Settings, Cctv, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Settings, Cctv, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -12,12 +12,28 @@ const navItems = [
 ];
 
 export function Sidebar() {
-  const pathname   = usePathname();
+  const pathname  = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("civicnode-sidebar-collapsed");
     if (saved !== null) setCollapsed(saved === "true");
+  }, []);
+
+  // Keyboard shortcut: Ctrl+B
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.ctrlKey && e.key === "b") {
+        e.preventDefault();
+        setCollapsed((prev) => {
+          const next = !prev;
+          localStorage.setItem("civicnode-sidebar-collapsed", String(next));
+          return next;
+        });
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   function toggle() {
@@ -36,19 +52,25 @@ export function Sidebar() {
       )}
     >
       {/* Toggle button */}
-      <button
-        onClick={toggle}
-        title={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
-        className={cn(
-          "mb-5 flex items-center justify-center w-7 h-7 rounded-full bg-[#a3b18a] hover:bg-[#588157] text-white transition-colors duration-200 cursor-pointer border-none shrink-0",
-          collapsed ? "mx-auto" : "ml-auto"
-        )}
-      >
-        {collapsed
-          ? <ChevronRight size={13} strokeWidth={3} />
-          : <ChevronLeft  size={13} strokeWidth={3} />
-        }
-      </button>
+      <div className={cn("relative group mb-5", collapsed ? "flex justify-center" : "flex justify-end")}>
+        <button
+          onClick={toggle}
+          className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#a3b18a] hover:bg-[#588157] text-white transition-colors duration-200 cursor-pointer border-none shrink-0"
+        >
+          {collapsed
+            ? <PanelLeftOpen  size={16} strokeWidth={2} />
+            : <PanelLeftClose size={16} strokeWidth={2} />
+          }
+        </button>
+
+        {/* Tooltip toggle */}
+        <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 flex items-center gap-2.5 px-3 py-2 bg-[#1a1a1a] text-white text-[12px] font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow-lg">
+          {collapsed ? <PanelLeftOpen size={14} strokeWidth={2} /> : <PanelLeftClose size={14} strokeWidth={2} />}
+          <span>{collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}</span>
+          <kbd className="ml-1 px-1.5 py-0.5 bg-white/15 rounded text-[10px] font-mono font-bold">Ctrl+B</kbd>
+          <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#1a1a1a]" />
+        </div>
+      </div>
 
       {/* Nav items */}
       <nav className="flex flex-col gap-2">
@@ -69,22 +91,14 @@ export function Sidebar() {
                 )}
               >
                 <Icon size={18} strokeWidth={2.5} className="shrink-0" />
-                {!collapsed && (
-                  <span className="truncate">{label}</span>
-                )}
+                {!collapsed && <span className="truncate">{label}</span>}
               </Link>
 
-              {/* Tooltip — hanya muncul saat collapsed */}
+              {/* Tooltip nav item — hanya saat collapsed */}
               {collapsed && (
-                <div
-                  className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50
-                             px-3 py-1.5 bg-[#2d2d2d] text-white text-[11px] font-bold rounded-lg
-                             whitespace-nowrap opacity-0 group-hover:opacity-100
-                             transition-opacity duration-150"
-                >
+                <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 z-50 flex items-center gap-2 px-3 py-2 bg-[#1a1a1a] text-white text-[12px] font-semibold rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow-lg">
                   {label}
-                  {/* Arrow kiri */}
-                  <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#2d2d2d]" />
+                  <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#1a1a1a]" />
                 </div>
               )}
             </div>
