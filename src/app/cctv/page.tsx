@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { useDialog } from "./_hooks/useDialog";
 import { useCctv }   from "./_hooks/useCctv";
@@ -12,6 +12,16 @@ import { ConfirmDialog } from "./_components/ConfirmDialog";
 
 export default function CCTVPage() {
   const [activeTab, setActiveTab] = useState<"cctv" | "zona">("cctv");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("civicnode-active-tab") as "cctv" | "zona" | null;
+    if (saved) setActiveTab(saved);
+  }, []);
+
+  function handleTabChange(tab: "cctv" | "zona") {
+    setActiveTab(tab);
+    localStorage.setItem("civicnode-active-tab", tab);
+  }
 
   const { dialog, toast, showConfirm, showToast, closeDialog } = useDialog();
   const cctv = useCctv({ showToast, showConfirm, closeDialog });
@@ -62,7 +72,7 @@ export default function CCTVPage() {
           {/* Badge-style tabs */}
           <div className="flex gap-2 pb-3">
             {(["cctv", "zona"] as const).map((tab) => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
+              <button key={tab} onClick={() => handleTabChange(tab)}
                 className={`px-4 py-1.5 rounded-full text-sm font-bold border-none cursor-pointer transition-all duration-150 ${
                   activeTab === tab
                     ? "bg-white text-[#588157]"
