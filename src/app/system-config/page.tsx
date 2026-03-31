@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { WalletAvatar } from "@/components/WalletAvatar";
-import { getAuthToken } from "@/lib/auth";
+import { getAuthPayload } from "@/lib/auth";
 
 interface StaffProfile {
   id: string;
@@ -21,15 +21,15 @@ export default function SystemConfigPage() {
   const [profile, setProfile] = useState<StaffProfile | null>(null);
 
   useEffect(() => {
-    const token = getAuthToken();
-    if (!token) return;
-
-    fetch(`/api/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
-      .then((json) => { if (json.success) setProfile(json.data); })
-      .catch(() => {});
+    const payload = getAuthPayload();
+    if (!payload) return;
+    setProfile({
+      id: payload.staff_id ?? "demo-admin",
+      full_name: "Demo Admin",
+      role: payload.role ?? "admin",
+      wallet_address: payload.wallet_address ?? "",
+      created_at: new Date().toISOString(),
+    });
   }, []);
 
   return (
