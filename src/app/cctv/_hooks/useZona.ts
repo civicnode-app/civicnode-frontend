@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Zona } from "../_types";
 import { useZonaStore } from "../_store/useZonaStore";
+import { useDashboardStore } from "@/app/dashboard/_store/useDashboardStore";
 
 type ZonaForm = { nama: string; deskripsi: string };
 
@@ -13,6 +14,13 @@ interface Options {
 
 export function useZona({ showToast, showConfirm, closeDialog }: Options) {
   const { zonaList, addZona, updateZona, deleteZona } = useZonaStore();
+  const dashZones = useDashboardStore((s) => s.zones);
+
+  // Merge live score dari dashboard simulation ke zone_reputation
+  const liveZonaList = zonaList.map((zona) => {
+    const live = dashZones.find((z) => z.id === zona.id);
+    return live && live.score !== null ? { ...zona, zone_reputation: live.score } : zona;
+  });
 
   const zonaLoading               = false;
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -22,7 +30,7 @@ export function useZona({ showToast, showConfirm, closeDialog }: Options) {
   const [saving, setSaving]         = useState(false);
   const [formError, setFormError]   = useState("");
 
-  const sortedZona = [...zonaList].sort((a, b) =>
+  const sortedZona = [...liveZonaList].sort((a, b) =>
     sortOrder === "asc"
       ? a.nama.localeCompare(b.nama, "id")
       : b.nama.localeCompare(a.nama, "id")
@@ -82,7 +90,7 @@ export function useZona({ showToast, showConfirm, closeDialog }: Options) {
   }
 
   return {
-    zonaList, zonaLoading, sortOrder, setSortOrder, sortedZona,
+    zonaList: liveZonaList, zonaLoading, sortOrder, setSortOrder, sortedZona,
     modalOpen, editTarget, form, setForm, saving, formError,
     openAdd, openEdit, closeModal, handleSubmit, handleDelete,
   };
