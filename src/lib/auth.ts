@@ -30,3 +30,55 @@ export function getAuthPayload(): { staff_id?: string; wallet_address?: string; 
     return null;
   }
 }
+
+// ── Demo accounts ────────────────────────────────────────────────────────────
+
+export interface DemoAccount {
+  id:         string;
+  name:       string;
+  role:       string;   // label yang ditampilkan di UI
+  jwtRole:    string;   // role di dalam token (untuk proxy.ts)
+  wallet:     string;   // wallet address (untuk WalletAvatar)
+}
+
+export const DEMO_ACCOUNTS: DemoAccount[] = [
+  {
+    id:      "acc-owner",
+    name:    "Budi Santoso",
+    role:    "Owner",
+    jwtRole: "owner",
+    wallet:  "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  },
+  {
+    id:      "acc-admin",
+    name:    "Dewi Rahayu",
+    role:    "Admin",
+    jwtRole: "admin",
+    wallet:  "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+  },
+  {
+    id:      "acc-korlap",
+    name:    "Ahmad Fauzi",
+    role:    "Korlap Armada Kebersihan",
+    jwtRole: "admin",   // akses penuh untuk keperluan demo
+    wallet:  "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+  },
+  {
+    id:      "acc-operator",
+    name:    "Siti Nurhaliza",
+    role:    "Operator Call Center",
+    jwtRole: "admin",   // akses penuh untuk keperluan demo
+    wallet:  "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+  },
+];
+
+export function makeDemoToken(account: DemoAccount): string {
+  const payload = btoa(
+    JSON.stringify({
+      staff_id:       account.id,
+      wallet_address: account.wallet,
+      role:           account.jwtRole,
+    }),
+  );
+  return `demo.${payload}.signature`;
+}

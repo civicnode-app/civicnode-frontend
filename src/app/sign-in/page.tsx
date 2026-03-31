@@ -1,17 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { setAuthToken } from "@/lib/auth";
-
-// Fake JWT-like token — cukup untuk proxy.ts & getAuthPayload() bisa decode role-nya
-const DEMO_PAYLOAD = btoa(
-  JSON.stringify({
-    staff_id: "demo-admin",
-    wallet_address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-    role: "admin",
-  }),
-);
-const DEMO_TOKEN = `demo.${DEMO_PAYLOAD}.signature`;
+import { setAuthToken, DEMO_ACCOUNTS, makeDemoToken } from "@/lib/auth";
 
 export default function SignIn() {
   const router = useRouter();
@@ -21,7 +11,8 @@ export default function SignIn() {
     setLoading(true);
     // Simulasi delay MetaMask
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    setAuthToken(DEMO_TOKEN);
+    // Login sebagai Owner (akun pertama) secara default
+    setAuthToken(makeDemoToken(DEMO_ACCOUNTS[0]));
     router.push("/dashboard");
   };
 

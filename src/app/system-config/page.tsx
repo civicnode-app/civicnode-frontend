@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { WalletAvatar } from "@/components/WalletAvatar";
-import { getAuthPayload } from "@/lib/auth";
+import { getAuthPayload, DEMO_ACCOUNTS } from "@/lib/auth";
 
 interface StaffProfile {
   id: string;
@@ -23,12 +23,13 @@ export default function SystemConfigPage() {
   useEffect(() => {
     const payload = getAuthPayload();
     if (!payload) return;
+    const acc = DEMO_ACCOUNTS.find((a) => a.id === payload.staff_id);
     setProfile({
-      id: payload.staff_id ?? "demo-admin",
-      full_name: "Demo Admin",
-      role: payload.role ?? "admin",
+      id:             payload.staff_id ?? "demo",
+      full_name:      acc?.name ?? "Demo Admin",
+      role:           acc?.role ?? payload.role ?? "admin",
       wallet_address: payload.wallet_address ?? "",
-      created_at: new Date().toISOString(),
+      created_at:     new Date().toISOString(),
     });
   }, []);
 
