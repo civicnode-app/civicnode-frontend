@@ -44,7 +44,7 @@ export function useCctv({ showToast, showConfirm, closeDialog }: Options) {
     setEditTarget(node);
     setForm({
       nama:         node.nama,
-      zona_id:      node.zona.id,
+      zona_id:      node.zona?.id ?? "",
       jenis_kamera: node.jenis_kamera,
       stream_url:   node.stream_url,
       ip_address:   node.ip_address,
@@ -64,7 +64,6 @@ export function useCctv({ showToast, showConfirm, closeDialog }: Options) {
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
     if (!form.nama.trim())       { setFormError("Nama kamera wajib diisi."); return; }
-    if (!form.zona_id)           { setFormError("Zona wajib dipilih.");       return; }
     if (!form.stream_url.trim()) { setFormError("Stream URL wajib diisi.");   return; }
     if (!form.ip_address.trim()) { setFormError("IP Address wajib diisi.");   return; }
 
@@ -72,7 +71,9 @@ export function useCctv({ showToast, showConfirm, closeDialog }: Options) {
     setFormError("");
 
     setTimeout(() => {
-      const zonaObj = zonaList.find((z) => z.id === form.zona_id) ?? { id: form.zona_id, nama: "Ext Zona" };
+      const zonaObj = form.zona_id
+        ? (zonaList.find((z) => z.id === form.zona_id) ?? { id: form.zona_id, nama: "Ext Zona" })
+        : null;
 
       if (editTarget) {
         updateCctv(editTarget.id, {

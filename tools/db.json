@@ -1,4 +1,42 @@
 {
-  "cctvList": [],
-  "zonaList": []
+  "cctvList": [
+    {
+      "id": "seed-c1774943873842",
+      "nama": "CCTV Simpang Antasari 1",
+      "ip_address": "192.168.1.10",
+      "stream_url": "rtsp://192.168.1.10/stream",
+      "status": true,
+      "active_detections": 0,
+      "confidence_score": 0,
+      "jenis_kamera": "cctv",
+      "created_at": "2026-03-31T07:57:53.842Z",
+      "zona": {
+        "id": "seed-z1",
+        "nama": "Simpang Antasari"
+      }
+    },
+    {
+      "id": "seed-c1774943945228",
+      "nama": "Taman Kamelia",
+      "ip_address": "192.168.1.11",
+      "stream_url": "rtsp://192.168.1.11/stream",
+      "status": true,
+      "active_detections": 0,
+      "confidence_score": 0,
+      "jenis_kamera": "cctv",
+      "created_at": "2026-03-31T07:59:05.228Z",
+      "zona": {
+        "id": "seed-z1774943866434",
+        "nama": "Simpang Antasari"
+      }
+    }
+  ],
+  "zonaList": [
+    {
+      "id": "seed-z1774943866434",
+      "nama": "Simpang Antasari",
+      "deskripsi": "Kawasan persimpangan utama kota",
+      "zone_reputation": 72
+    }
+  ]
 }

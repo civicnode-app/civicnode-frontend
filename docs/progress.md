@@ -1,5 +1,93 @@
 # Progress Log
 
+## Sesi 2026-03-31
+
+### Yang Sudah Selesai
+
+#### Tools CLI — Seed Data via Terminal
+
+- ✅ **`tools/add-zona.mjs`** dikonversi dari readline interaktif ke CLI params (`--nama`, `--deskripsi`, `--reputasi`)
+- ✅ **`tools/add-cctv.mjs`** sudah CLI params dari sesi sebelumnya (tidak ada perubahan hari ini)
+- ✅ Semua tools pakai ES module (`import`), tidak ada `require`
+- ✅ `npm run seed:add-zona`, `seed:add-cctv`, `seed:list`, `seed:reset` semua berjalan normal
+
+#### Dashboard — Sinkronisasi Seed + Reaktivitas Penuh
+
+- ✅ **`mergeNodesFromSeed(zones, cameras)`** — action baru di `useDashboardStore` untuk merge zona & kamera dari store lain, skip duplikat by ID
+- ✅ **`removeZone(zoneId)`** — action baru di `useDashboardStore`; hapus zona + kamera-nya + kurangi `activeDetections`
+- ✅ **`SimulationProvider`** diperbarui:
+  - Sync awal on mount: `mergeFromSeed()` → mapping ke `TriageZone`/`CameraNode` → `mergeNodesFromSeed()` → `activateNullZones()`
+  - Reactive subscription `useCctvStore` → camera baru langsung masuk dashboard + aktivasi zona null
+  - Reactive subscription `useZonaStore` → zona baru langsung masuk dashboard
+  - **Cleanup orphan on mount**: CCTV yang zona-nya sudah dihapus dari `zonaList` → `clearZona()` otomatis
+  - **Cleanup deletion on mount**: zona di `useDashboardStore` yang tidak ada di `zonaList` → `removeZone()` otomatis (menangani case di mana dashboard store reset ke DUMMY_ZONES setiap refresh karena tidak dipersist)
+- ✅ `activateNullZones()` — fungsi helper yang mengaktifkan zona ber-`score: null` yang kini punya kamera, mengisi score dari `zone_reputation` (default 50 jika 0)
+- ✅ `zonaToTriageZone()` selalu return `score: null` — zona baru tidak punya score sampai ada kamera yang dipasang
+- ✅ `cctvToCamera()` return `null` untuk CCTV tanpa zona — tidak ikut masuk ke `cameras` dashboard
+
+#### Zona — Sinkronisasi Hapus ke Semua Store
+
+- ✅ **`useCctvStore.clearZona(zoneId)`** — set `zona: null` untuk semua CCTV dengan zona tersebut
+- ✅ **`useZona.handleDelete`** memanggil `clearZona()` + `removeZone()` langsung (tidak lewat subscription, lebih eksplisit dan reliable)
+- ✅ `CCTVNode.zona` diubah dari `{ id, nama }` menjadi `{ id, nama } | null`
+- ✅ `page.tsx` — filter kamera per zona pakai `c.zona?.id` (optional chaining, safe untuk null)
+
+#### CCTV — Zona Opsional
+
+- ✅ **`CctvModal`** — field Zona diubah dari required (`*`) menjadi opsional, pilihan default "— Tanpa Zona —"
+- ✅ **`useCctv.handleSubmit`** — validasi `zona_id` dihapus; `zonaObj` bisa `null` kalau tidak dipilih
+- ✅ **`useCctv.openEdit`** — handle `node.zona?.id` (safe null check)
+- ✅ **`CctvCard`** — zona null tampil badge kuning italic "Tidak memantau zona"
+
+#### ZonaCard — State Tidak Diketahui
+
+- ✅ Zona tanpa kamera (`cameras.length === 0`) tampil abu-abu: badge "TIDAK DIKETAHUI", score bar kosong "—"
+- ✅ Zona dengan kamera tampil score nyata seperti biasa
+- ✅ Accent color, label badge, progress bar semuanya conditional berdasarkan `noCam`
+
+#### Dashboard Filter — Tab Baru + Fix Logika
+
+- ✅ **Tab "Tidak Terpantau"** ditambahkan (`score === null`) — zona tanpa CCTV tidak lagi nyempil di tab Kritis
+- ✅ **Fix filter Kritis** — sebelumnya `score === null || score < 40`, sekarang hanya `score !== null && score < 40`
+- ✅ Urutan tab: Semua → Tidak Terpantau → Zona Kritis → Zona Kotor → Zona Bersih
+
+#### TopBar — Disclaimer Mode Demo
+
+- ✅ Header popup account switcher diganti jadi banner kuning **"⚠ Mode Demo"** dengan penjelasan bahwa fitur ini hanya untuk presentasi
+- ✅ Footer popup diperbarui: "Wallet address bersifat dummy — bukan akun MetaMask sungguhan"
+
+---
+
+### Catatan Arsitektur
+
+**Alur data seed → frontend:**
+```
+tools/add-cctv.mjs / add-zona.mjs
+        ↓ tulis ke
+tools/db.json
+        ↓ dibaca oleh
+/api/seed (GET)
+        ↓ di-fetch oleh
+useCctvStore.mergeFromSeed() / useZonaStore.mergeFromSeed()
+        ↓ di-sync oleh
+SimulationProvider (on mount) → useDashboardStore.mergeNodesFromSeed()
+        ↓
+localStorage (persist) + in-memory simulation
+```
+
+**Alur hapus zona:**
+```
+useZona.handleDelete(zona)
+  → deleteZona(zona.id)           [useZonaStore]
+  → clearZona(zona.id)            [useCctvStore — set zona: null untuk CCTV terdampak]
+  → removeZone(zona.id)           [useDashboardStore — hapus zone + cameras + kurangi activeDetections]
+```
+
+**Kenapa useDashboardStore tidak dipersist:**
+Dashboard store di-reset ke `DUMMY_ZONES` setiap refresh. Ini disengaja agar score simulasi mulai segar. Tapi ini berarti setiap refresh harus sync ulang dari `useZonaStore` (yang dipersist). `SimulationProvider` menangani ini on mount.
+
+---
+
 ## Sesi 2026-03-30 (lanjutan 4)
 
 ### Yang Sudah Selesai

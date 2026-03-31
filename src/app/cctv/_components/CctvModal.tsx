@@ -43,11 +43,11 @@ export function CctvModal({ open, isEdit, editId, form, zonaList, saving, error,
           <div className="flex gap-3">
             <div className="flex flex-col gap-1.5 flex-1">
               <label className="text-xs font-extrabold text-[#555] tracking-wide">
-                ZONA <span className="text-red-400">*</span>
+                ZONA <span className="text-[#bbb] font-semibold normal-case tracking-normal">(opsional)</span>
               </label>
               <select value={form.zona_id} onChange={(e) => onChange({ zona_id: e.target.value })}
                 className="border-2 border-[#e0e0e0] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-[#588157] transition-colors bg-white">
-                <option value="">— Pilih Zona —</option>
+                <option value="">— Tanpa Zona —</option>
                 {zonaList.map((z) => <option key={z.id} value={z.id}>{z.nama}</option>)}
               </select>
             </div>

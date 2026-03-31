@@ -9,20 +9,22 @@ import { DispatchModal } from "./DispatchModal";
 import { useZoneTriage } from "../_hooks/useZoneTriage";
 import { getAccentColor } from "../_types";
 
-type Filter = "semua" | "kritis" | "kotor" | "bersih";
+type Filter = "semua" | "tidak-terpantau" | "kritis" | "kotor" | "bersih";
 
 const FILTERS: { id: Filter; label: string; color: string; activeClass: string }[] = [
-  { id: "semua",  label: "Semua Zona",    color: "#64748b", activeClass: "bg-white text-slate-700" },
-  { id: "kritis", label: "Zona Kritis",   color: "#ef4444", activeClass: "bg-red-500 text-white"   },
-  { id: "kotor",  label: "Zona Kotor",    color: "#f97316", activeClass: "bg-orange-500 text-white" },
-  { id: "bersih", label: "Zona Bersih",   color: "#588157", activeClass: "bg-[#588157] text-white"  },
+  { id: "semua",           label: "Semua Zona",       color: "#64748b", activeClass: "bg-white text-slate-700"          },
+  { id: "tidak-terpantau", label: "Tidak Terpantau",  color: "#94a3b8", activeClass: "bg-slate-400 text-white"          },
+  { id: "kritis",          label: "Zona Kritis",      color: "#ef4444", activeClass: "bg-red-500 text-white"            },
+  { id: "kotor",           label: "Zona Kotor",       color: "#f97316", activeClass: "bg-orange-500 text-white"         },
+  { id: "bersih",          label: "Zona Bersih",      color: "#588157", activeClass: "bg-[#588157] text-white"          },
 ];
 
 function matchFilter(score: number | null, filter: Filter): boolean {
-  if (filter === "semua")  return true;
-  if (filter === "kritis") return score === null || score < 40;
-  if (filter === "kotor")  return score !== null && score >= 40 && score < 80;
-  if (filter === "bersih") return score !== null && score >= 80;
+  if (filter === "semua")           return true;
+  if (filter === "tidak-terpantau") return score === null;
+  if (filter === "kritis")          return score !== null && score < 40;
+  if (filter === "kotor")           return score !== null && score >= 40 && score < 80;
+  if (filter === "bersih")          return score !== null && score >= 80;
   return true;
 }
 
@@ -184,12 +186,18 @@ export default function ZoneTriageList() {
 
                       {/* AI Evidence Thumbnail */}
                       <div className="relative w-full aspect-square bg-slate-100 rounded-2xl mb-4 overflow-hidden group/thumb shrink-0">
-                        <Image
-                          src={zone.evidence_url}
-                          alt="AI Evidence"
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover/thumb:scale-110"
-                        />
+                        {zone.evidence_url ? (
+                          <Image
+                            src={zone.evidence_url}
+                            alt="AI Evidence"
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover/thumb:scale-110"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-xs">
+                            Tidak ada gambar
+                          </div>
+                        )}
                         <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent flex items-end p-2.5">
                           <span className="text-white text-[10px] font-bold tracking-wide">{zone.last_updated}</span>
                         </div>

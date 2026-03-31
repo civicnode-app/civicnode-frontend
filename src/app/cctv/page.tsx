@@ -126,7 +126,7 @@ export default function CCTVPage() {
                     <ZonaCard
                       key={z.id}
                       zona={z}
-                      cameras={cctv.cctvList.filter((c) => c.zona.id === z.id)}
+                      cameras={cctv.cctvList.filter((c) => c.zona?.id === z.id)}
                       onEdit={() => zona.openEdit(z)}
                       onDelete={() => zona.handleDelete(z)}
                     />

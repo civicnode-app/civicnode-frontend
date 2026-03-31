@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync } from "fs";
 import { join, dirname } from "path";
-import { createInterface } from "readline";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -16,35 +15,46 @@ const C = {
   gray:   "\x1b[90m",
 };
 
-const readDb  = () => JSON.parse(readFileSync(DB_PATH, "utf-8"));
-const writeDb = (data) => writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+function parseArgs(argv) {
+  const args = {};
+  for (let i = 0; i < argv.length - 1; i++) {
+    if (argv[i].startsWith("--")) args[argv[i].slice(2)] = argv[i + 1];
+  }
+  return args;
+}
 
-const rl = createInterface({ input: process.stdin, output: process.stdout });
-const ask = (question, defaultVal) => new Promise((resolve) => {
-  const hint = defaultVal !== undefined ? ` ${C.gray}[${defaultVal}]${C.reset}` : "";
-  rl.question(`  ${question}${hint}: `, (ans) => resolve(ans.trim() || (defaultVal ?? "")));
-});
+const args = parseArgs(process.argv.slice(2));
 
-const db = readDb();
+const nama      = args.nama;
+const deskripsi = args.deskripsi ?? "";
+const reputasi  = parseInt(args.reputasi ?? "50", 10);
 
-console.log(`\n${C.bold}${C.cyan}╔══════════════════════════════╗${C.reset}`);
-console.log(`${C.bold}${C.cyan}║   🗺️   Tambah Zona Baru       ║${C.reset}`);
-console.log(`${C.bold}${C.cyan}╚══════════════════════════════╝${C.reset}\n`);
+if (!nama) {
+  console.log(`
+${C.bold}Usage:${C.reset}
+  node tools/add-zona.mjs --nama <nama> [options]
 
-const nama = await ask("Nama zona  *");
-if (!nama) { console.log(`\n${C.red}  ✗ Nama zona wajib diisi.${C.reset}\n`); rl.close(); process.exit(1); }
+${C.bold}Required:${C.reset}
+  --nama       Nama zona
 
-const deskripsi = await ask("Deskripsi  ", "");
-const reputasi  = await ask("Reputasi   ", "50");
+${C.bold}Optional:${C.reset}
+  --deskripsi  Deskripsi zona       ${C.gray}[default: ""]${C.reset}
+  --reputasi   Skor reputasi 0-100  ${C.gray}[default: 50]${C.reset}
+
+${C.bold}Contoh:${C.reset}
+  node tools/add-zona.mjs --nama "Pasar Baru" --deskripsi "Kawasan pasar tradisional" --reputasi 65
+`);
+  process.exit(1);
+}
+
+const db = JSON.parse(readFileSync(DB_PATH, "utf-8"));
 
 db.zonaList.push({
   id:              `seed-z${Date.now()}`,
   nama,
   deskripsi,
-  zone_reputation: Math.min(100, Math.max(0, parseInt(reputasi, 10) || 50)),
+  zone_reputation: Math.min(100, Math.max(0, isNaN(reputasi) ? 50 : reputasi)),
 });
 
-writeDb(db);
-console.log(`\n${C.green}  ✓ Zona "${C.bold}${nama}${C.reset}${C.green}" ditambahkan!${C.reset}`);
-console.log(`${C.gray}  Refresh browser untuk melihat perubahan.\n${C.reset}`);
-rl.close();
+writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+console.log(`${C.green}✓ Zona "${C.bold}${nama}${C.reset}${C.green}" ditambahkan.${C.reset}`);

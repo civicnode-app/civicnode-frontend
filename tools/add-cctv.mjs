@@ -1,66 +1,66 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync } from "fs";
 import { join, dirname } from "path";
-import { createInterface } from "readline";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH   = join(__dirname, "db.json");
 
-const C = {
-  reset:  "\x1b[0m",
-  bold:   "\x1b[1m",
-  green:  "\x1b[32m",
-  cyan:   "\x1b[36m",
-  red:    "\x1b[31m",
-  gray:   "\x1b[90m",
-};
+const C = { reset:"\x1b[0m", bold:"\x1b[1m", green:"\x1b[32m", cyan:"\x1b[36m", red:"\x1b[31m", gray:"\x1b[90m" };
 
-const readDb  = () => JSON.parse(readFileSync(DB_PATH, "utf-8"));
-const writeDb = (data) => writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
-
-const rl = createInterface({ input: process.stdin, output: process.stdout });
-const ask = (question, defaultVal) => new Promise((resolve) => {
-  const hint = defaultVal ? ` ${C.gray}[${defaultVal}]${C.reset}` : "";
-  rl.question(`  ${question}${hint}: `, (ans) => resolve(ans.trim() || defaultVal || ""));
-});
-
-const db = readDb();
-
-console.log(`\n${C.bold}${C.cyan}╔══════════════════════════════╗${C.reset}`);
-console.log(`${C.bold}${C.cyan}║   🎥  Tambah Kamera CCTV     ║${C.reset}`);
-console.log(`${C.bold}${C.cyan}╚══════════════════════════════╝${C.reset}\n`);
-
-const existingZonas = [...new Map(db.cctvList.map((c) => [c.zona.id, c.zona])).values()];
-if (existingZonas.length) {
-  console.log(`${C.gray}  Zona tersedia di db:${C.reset}`);
-  existingZonas.forEach((z) => console.log(`  ${C.gray}  ${z.id} → ${z.nama}${C.reset}`));
-  console.log();
+// Parse --key value dari argv
+function parseArgs(argv) {
+  const args = {};
+  for (let i = 0; i < argv.length - 1; i++) {
+    if (argv[i].startsWith("--")) args[argv[i].slice(2)] = argv[i + 1];
+  }
+  return args;
 }
 
-const nama       = await ask("Nama kamera *");
-if (!nama) { console.log(`\n${C.red}  ✗ Nama kamera wajib diisi.${C.reset}\n`); rl.close(); process.exit(1); }
+const args = parseArgs(process.argv.slice(2));
 
-const ip_address = await ask("IP Address", `192.168.1.${10 + db.cctvList.length}`);
-const stream_url = await ask("Stream URL", `rtsp://${ip_address}/stream`);
-const zona_id    = await ask("Zona ID   ", "z1");
-const zona_nama  = await ask("Nama Zona ", existingZonas.find((z) => z.id === zona_id)?.nama || "");
-const jenis      = await ask("Jenis     ", "cctv");
+const nama       = args.nama;
+const ip         = args.ip       ?? `192.168.1.${10 + JSON.parse(readFileSync(DB_PATH,"utf-8")).cctvList.length}`;
+const stream     = args.stream   ?? `rtsp://${ip}/stream`;
+const zonaId     = args["zona-id"]   ?? "z1";
+const zonaNama   = args["zona-nama"] ?? "";
+const jenis      = args.jenis    ?? "cctv";
+
+if (!nama || !zonaNama) {
+  console.log(`
+${C.bold}Usage:${C.reset}
+  node tools/add-cctv.mjs --nama <nama> --zona-id <id> --zona-nama <nama> [options]
+
+${C.bold}Required:${C.reset}
+  --nama       Nama kamera
+  --zona-id    ID zona (contoh: z1)
+  --zona-nama  Nama zona (contoh: "Simpang Antasari")
+
+${C.bold}Optional:${C.reset}
+  --ip         IP address          ${C.gray}[auto: 192.168.1.x]${C.reset}
+  --stream     Stream URL          ${C.gray}[auto: rtsp://<ip>/stream]${C.reset}
+  --jenis      Jenis kamera        ${C.gray}[default: cctv]${C.reset}
+
+${C.bold}Contoh:${C.reset}
+  node tools/add-cctv.mjs --nama "CCTV Pasar Baru" --zona-id z2 --zona-nama "Pasar Sudimampur" --ip 192.168.1.20
+`);
+  process.exit(1);
+}
+
+const db = JSON.parse(readFileSync(DB_PATH, "utf-8"));
 
 db.cctvList.push({
   id:                `seed-c${Date.now()}`,
   nama,
-  ip_address,
-  stream_url,
+  ip_address:        ip,
+  stream_url:        stream,
   status:            true,
   active_detections: 0,
   confidence_score:  0,
   jenis_kamera:      jenis,
   created_at:        new Date().toISOString(),
-  zona:              { id: zona_id, nama: zona_nama },
+  zona:              { id: zonaId, nama: zonaNama },
 });
 
-writeDb(db);
-console.log(`\n${C.green}  ✓ Kamera "${C.bold}${nama}${C.reset}${C.green}" ditambahkan!${C.reset}`);
-console.log(`${C.gray}  Refresh browser untuk melihat perubahan.\n${C.reset}`);
-rl.close();
+writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+console.log(`${C.green}✓ Kamera "${C.bold}${nama}${C.reset}${C.green}" ditambahkan ke ${zonaId} (${zonaNama}).${C.reset}`);

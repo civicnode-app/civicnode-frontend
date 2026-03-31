@@ -11,7 +11,7 @@ export interface CCTVNode {
   confidence_score: number;
   jenis_kamera: string;
   created_at: string;
-  zona: { id: string; nama: string };
+  zona: { id: string; nama: string } | null;
   latitude?: number;
   longitude?: number;
 }

@@ -19,9 +19,11 @@ export function CctvCard({ node, onEdit, onDelete }: Props) {
           </div>
           <div className="min-w-0">
             <h3 className="font-black text-[15px] text-gray-900 leading-tight truncate">{node.nama}</h3>
-            <div className="flex items-center gap-1 mt-0.5 text-[#888]">
-              <MapPin className="w-3 h-3 shrink-0" />
-              <span className="text-[11px] font-bold truncate">{node.zona.nama}</span>
+            <div className="flex items-center gap-1 mt-0.5">
+              <MapPin className={`w-3 h-3 shrink-0 ${node.zona ? "text-[#888]" : "text-amber-400"}`} />
+              <span className={`text-[11px] font-bold truncate ${node.zona ? "text-[#888]" : "text-amber-500 italic"}`}>
+                {node.zona ? node.zona.nama : "Tidak memantau zona"}
+              </span>
             </div>
           </div>
         </div>

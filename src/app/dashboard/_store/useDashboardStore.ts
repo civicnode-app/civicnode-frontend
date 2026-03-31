@@ -36,6 +36,8 @@ interface DashboardStore {
   decrementZoneDetections: (zoneId: string, amount: number) => void;
   updateConfig: (patch: Partial<SimConfig>) => void;
   setArmada: (jumlah: number) => void;
+  mergeNodesFromSeed: (newZones: TriageZone[], newCameras: CameraNode[]) => void;
+  removeZone: (zoneId: string) => void;
 }
 
 export const useDashboardStore = create<DashboardStore>((set) => ({
@@ -117,6 +119,31 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
       };
     }),
 
+  removeZone: (zoneId) =>
+    set((s) => {
+      const removedCams       = s.cameras.filter((c) => c.zone_id === zoneId);
+      const removedDetections = removedCams.reduce((sum, c) => sum + c.active_detections, 0);
+      return {
+        zones:            s.zones.filter((z) => z.id !== zoneId),
+        cameras:          s.cameras.filter((c) => c.zone_id !== zoneId),
+        activeDetections: Math.max(0, s.activeDetections - removedDetections),
+      };
+    }),
+
   updateConfig: (patch) => set((s) => ({ config: { ...s.config, ...patch } })),
   setArmada:    (jumlah) => set({ armadaSiaga: jumlah }),
+
+  mergeNodesFromSeed: (newZones, newCameras) =>
+    set((s) => {
+      const existingZoneIds = new Set(s.zones.map((z) => z.id));
+      const existingCamIds  = new Set(s.cameras.map((c) => c.id));
+      const zonesToAdd  = newZones.filter((z) => !existingZoneIds.has(z.id));
+      const camsToAdd   = newCameras.filter((c) => !existingCamIds.has(c.id));
+      if (!zonesToAdd.length && !camsToAdd.length) return {};
+      return {
+        zones:            [...s.zones, ...zonesToAdd],
+        cameras:          [...s.cameras, ...camsToAdd],
+        activeDetections: s.activeDetections + camsToAdd.reduce((sum, c) => sum + c.active_detections, 0),
+      };
+    }),
 }));

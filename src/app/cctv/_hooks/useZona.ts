@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Zona } from "../_types";
 import { useZonaStore } from "../_store/useZonaStore";
+import { useCctvStore } from "../_store/useCctvStore";
 import { useDashboardStore } from "@/app/dashboard/_store/useDashboardStore";
 
 type ZonaForm = { nama: string; deskripsi: string };
@@ -85,6 +86,8 @@ export function useZona({ showToast, showConfirm, closeDialog }: Options) {
     showConfirm(`Hapus zona "${zona.nama}"?`, () => {
       closeDialog();
       deleteZona(zona.id);
+      useCctvStore.getState().clearZona(zona.id);
+      useDashboardStore.getState().removeZone(zona.id);
       showToast("Zona berhasil dihapus.");
     });
   }

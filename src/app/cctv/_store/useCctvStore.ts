@@ -27,6 +27,7 @@ interface CctvStore {
   updateCctv:    (id: string, patch: Partial<CCTVNode>) => void;
   deleteCctv:    (id: string) => void;
   mergeFromSeed: () => Promise<void>;
+  clearZona:     (zoneId: string) => void;
 }
 
 export const useCctvStore = create<CctvStore>()(
@@ -36,6 +37,11 @@ export const useCctvStore = create<CctvStore>()(
       addCctv:    (node)      => set((s) => ({ cctvList: [...s.cctvList, node] })),
       updateCctv: (id, patch) => set((s) => ({ cctvList: s.cctvList.map((c) => c.id === id ? { ...c, ...patch } : c) })),
       deleteCctv: (id)        => set((s) => ({ cctvList: s.cctvList.filter((c) => c.id !== id) })),
+      clearZona: (zoneId) =>
+        set((s) => ({
+          cctvList: s.cctvList.map((c) => c.zona?.id === zoneId ? { ...c, zona: null } : c),
+        })),
+
       mergeFromSeed: async () => {
         try {
           const res  = await fetch("/api/seed");

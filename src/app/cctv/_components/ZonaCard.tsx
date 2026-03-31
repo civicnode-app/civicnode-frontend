@@ -16,9 +16,10 @@ function repAccent(score: number): string {
 }
 
 export function ZonaCard({ zona, cameras, onEdit, onDelete }: Props) {
+  const noCam   = cameras.length === 0;
   const rep     = Math.round(zona.zone_reputation);
-  const color   = repColor(rep);
-  const accent  = repAccent(rep);
+  const color   = noCam ? { bg: "bg-slate-100", text: "text-slate-400" } : repColor(rep);
+  const accent  = noCam ? "#94a3b8" : repAccent(rep);
   const online  = cameras.filter((c) => c.status).length;
 
   return (
@@ -41,7 +42,7 @@ export function ZonaCard({ zona, cameras, onEdit, onDelete }: Props) {
             </div>
           </div>
           <span className={`shrink-0 ${color.bg} ${color.text} text-[10px] font-black px-2.5 py-1 rounded-full`}>
-            {repLabel(rep)} · {rep}
+            {noCam ? "TIDAK DIKETAHUI" : `${repLabel(rep)} · ${rep}`}
           </span>
         </div>
 
@@ -49,12 +50,14 @@ export function ZonaCard({ zona, cameras, onEdit, onDelete }: Props) {
         <div>
           <div className="flex justify-between items-center mb-1.5">
             <span className="text-[9px] font-extrabold text-slate-400 tracking-widest">CLEANLINESS SCORE</span>
-            <span className="text-[12px] font-black" style={{ color: accent }}>{rep}%</span>
+            <span className="text-[12px] font-black" style={{ color: accent }}>
+              {noCam ? "—" : `${rep}%`}
+            </span>
           </div>
           <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${rep}%`, backgroundColor: accent }}
+              style={{ width: noCam ? "0%" : `${rep}%`, backgroundColor: accent }}
             />
           </div>
         </div>
