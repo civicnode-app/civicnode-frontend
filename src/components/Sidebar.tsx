@@ -83,8 +83,8 @@ export function Sidebar() {
                 className={cn(
                   "flex items-center w-full font-extrabold text-[13px] text-white no-underline transition-colors duration-200 overflow-hidden",
                   collapsed
-                    ? "justify-center p-3.5 rounded-2xl"
-                    : "gap-3 px-5 py-3.5 rounded-full",
+                    ? "justify-center h-12 rounded-2xl"
+                    : "gap-3 px-5 h-12 rounded-full",
                   isActive
                     ? "bg-[#588157]"
                     : "bg-[#a3b18a] hover:bg-[#588157]"
